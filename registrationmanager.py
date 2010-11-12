@@ -4,6 +4,7 @@
 from common import debug
 from sql import SQL
 
+FIELD_ID = 'id'
 FIELD_JID = 'registered_jid'
 TABLE_REG = 'registrations'
 
@@ -19,3 +20,13 @@ class RegistrationManager:
         SQL().commit()
         result = SQL().fetchall()
         return [result[i][0] for i in range(len(result))]
+
+    def isRegistered(self, jid):
+        '''Return whether a given JID is already registered.'''
+        debug('We want to know whether %s is registered.' % jid)
+        req = "select %s from %s where %s=%s" % (FIELD_ID, TABLE_REG, FIELD_JID, '%s')
+        debug('About to execute: [%s]' % req)
+        SQL().execute(req, (jid,))
+        SQL().commit()
+        result = SQL().fetchall()
+        return (0 != len(result))
