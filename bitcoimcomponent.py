@@ -35,8 +35,8 @@ class BitcoimComponent:
         self.cnx.RegisterHandler(NS_PRESENCE, self.presenceReceived)
         self.cnx.RegisterHandler(NS_IQ, self.iqReceived)
         self.handleDisco(self.cnx)
-        self.reg_manager = RegistrationManager()
-        for jid in self.reg_manager.getAllContacts():
+        self.regManager = RegistrationManager()
+        for jid in self.regManager.getAllContacts():
             self.cnx.send(Presence(to=jid, frm=self.jid, typ='probe'))
 
     def handleDisco(self, cnx):
@@ -61,7 +61,7 @@ class BitcoimComponent:
 
     def messageReceived(self, cnx, msg):
         '''Message received'''
-        if not self.reg_manager.isRegistered(msg.getFrom().getStripped()):
+        if not self.regManager.isRegistered(msg.getFrom().getStripped()):
             return
         debug("Message received from subscriber %s" % msg.getBody())
 
@@ -79,7 +79,7 @@ class BitcoimComponent:
         elif typ in ['unsubscribe', 'unsubscribed']:
             self.unsubscriptionRequested(cnx, prs)
         elif typ == 'probe':
-            if not self.reg_manager.isRegistered(prs.getFrom().getStripped()):
+            if not self.regManager.isRegistered(prs.getFrom().getStripped()):
                 return
             prs = Presence(to=frm, type='chat', show='online', frm=self.jid,
                            status='Current balance: %s' % self.bitcoin.getbalance())
