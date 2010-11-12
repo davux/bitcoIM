@@ -1,0 +1,24 @@
+#! /usr/bin/python
+# -*- coding: utf-8 -*-
+# vi: sts=4 et sw=4
+
+from common import problem, debug
+try:
+    from conf import component as info
+except ImportError:
+    problem("Error: Please create a file named 'conf.py' (e.g. rename and edit conf.py.example).", True)
+try:
+    from xmpp import client, protocol
+except ImportError:
+    problem("Error: this program needs the Python XMPP library.", True)
+from bitcoimcomponent import BitcoimComponent
+
+try:
+    bitcoim = BitcoimComponent(info['jid'], info['password'],
+                             info['server'], info['port'])
+except Exception, message:
+    problem("Error while connecting to server: %s" % (message), True)
+try:
+    bitcoim.loop(10)
+except KeyboardInterrupt:
+    bitcoim.sayGoodbye()
