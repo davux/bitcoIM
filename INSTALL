@@ -1,0 +1,12 @@
+Edit conf.py.example and rename it to conf.py.
+
+In the 'component' section, set up the credentials that should be used
+to connect as a component to the Jabber server.
+
+The 'db' section is used to set up the file name of the SQLite
+database used to store registrations.
+
+Also create the table in the database using the file
+'registrations.sql'. For example, is the file name of the
+database is registrations.db, simply run from the command line:
+$ sqlite < registrations.sql registrations.db
