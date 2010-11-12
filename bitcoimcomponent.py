@@ -31,6 +31,9 @@ class BitcoimComponent:
             debug("Connected to bitcoin. Balance: %s" % self.bitcoin.getbalance())
         except IOError:
             raise Exception('Unable to connect to JSON server as %s' % (bitcoin_conf['user']))
+        self.cnx.RegisterHandler(NS_MESSAGE, self.messageReceived)
+        self.cnx.RegisterHandler(NS_PRESENCE, self.presenceReceived)
+        self.cnx.RegisterHandler(NS_IQ, self.iqReceived)
         self.handleDisco(self.cnx)
         self.reg_manager = RegistrationManager()
         for jid in self.reg_manager.getAllContacts():
@@ -55,3 +58,12 @@ class BitcoimComponent:
     def sayGoodbye(self):
         '''Ending method. Doesn't do anything interesting yet.'''
         debug("Bye.")
+
+    def messageReceived(self, cnx, msg):
+        '''Message received'''
+
+    def presenceReceived(self, cnx, prs):
+        '''Presence received'''
+
+    def iqReceived(self, cnx, iq):
+        '''IQ received'''
