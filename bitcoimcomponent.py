@@ -3,6 +3,8 @@
 
 import app
 from common import problem, debug
+from conf import bitcoin as bitcoin_conf
+from jsonrpc import ServiceProxy
 from registrationmanager import RegistrationManager
 from xmpp.client import Component
 from xmpp.protocol import JID, Presence, Error, NodeProcessed, \
@@ -24,6 +26,11 @@ class BitcoimComponent:
             raise Exception('Unable to connect to %s:%s' % (server, port))
         if not self.cnx.auth(jid, password):
             raise Exception('Unable to authenticate as %s' % (jid))
+        self.bitcoin = ServiceProxy("http://%s:%s@127.0.0.1:8332" % (bitcoin_conf['user'], bitcoin_conf['password']))
+        try:
+            debug("Connected to bitcoin. Balance: %s" % self.bitcoin.getbalance())
+        except IOError:
+            raise Exception('Unable to connect to JSON server as %s' % (bitcoin_conf['user']))
         self.handleDisco(self.cnx)
         self.reg_manager = RegistrationManager()
         for jid in self.reg_manager.getAllContacts():

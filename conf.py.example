@@ -8,3 +8,7 @@ component = { 'jid': 'name-of-the-component',
             }
 
 db = {'file': 'registrations.db'}
+
+bitcoin = {'user': 'rpc-user',
+           'password': 'rpc-password',
+          }
