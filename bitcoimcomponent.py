@@ -67,6 +67,33 @@ class BitcoimComponent:
 
     def presenceReceived(self, cnx, prs):
         '''Presence received'''
+        typ = prs.getType()
+        frm = prs.getFrom()
+        to = prs.getTo().getStripped()
+        if to != self.jid:
+            return
+        if typ == 'subscribe':
+            self.subscriptionRequested(cnx, prs)
+        elif typ == 'subscribed':
+            debug('Subscribed. Any interest in this information?')
+        elif typ in ['unsubscribe', 'unsubscribed']:
+            self.unsubscriptionRequested(cnx, prs)
+        elif typ == 'probe':
+            if not self.reg_manager.isRegistered(prs.getFrom().getStripped()):
+                return
+            prs = Presence(to=frm, type='chat', show='online', frm=self.jid,
+                           status='Current balance: %s' % self.bitcoin.getbalance())
+            self.cnx.send(prs)
+        elif typ == 'error':
+            debug('Presence error. Just ignore it?')
 
     def iqReceived(self, cnx, iq):
         '''IQ received'''
+
+    def subscriptionRequested(self, cnx, prs):
+        '''A subscription request was received'''
+        debug("Subscription request from %s" % prs.getFrom())
+
+    def unsubscriptionRequested(self, cnx, prs):
+        '''An unsubscription request was received'''
+        debug("User %s unsubscribed!" % prs.getFrom())
