@@ -45,7 +45,7 @@ class BitcoimComponent:
         '''
         browser = Browser()
         browser.PlugIn(cnx)
-        ids = [{'category': 'gateway', 'type': 'xmpp',
+        ids = [{'category': 'gateway', 'type': 'bitcoin',
                'name':app.identifier}]
         info = {'ids': ids, 'features': [NS_DISCO_INFO]}
         browser.setDiscoHandler({'items': [], 'info': info})
