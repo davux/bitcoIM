@@ -61,6 +61,9 @@ class BitcoimComponent:
 
     def messageReceived(self, cnx, msg):
         '''Message received'''
+        if not self.reg_manager.isRegistered(msg.getFrom().getStripped()):
+            return
+        debug("Message received from subscriber %s" % msg.getBody())
 
     def presenceReceived(self, cnx, prs):
         '''Presence received'''
