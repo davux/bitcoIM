@@ -25,7 +25,7 @@ class RegistrationManager:
         debug('We want to know whether %s is registered.' % jid)
         req = "select %s from %s where %s=?" % (FIELD_ID, TABLE_REG, FIELD_JID)
         debug('About to execute: [%s]' % req)
-        SQL().execute(req, (jid,))
+        SQL().execute(req, (unicode(jid),))
         result = SQL().fetchall()
         return (0 != len(result))
 

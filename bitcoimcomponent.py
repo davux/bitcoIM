@@ -63,7 +63,7 @@ class BitcoimComponent:
         debug("Bye.")
 
     def sendBitcoinPresence(self, cnx, jid):
-        if not self.regManager.isRegistered(jid.getStripped()):
+        if not self.regManager.isRegistered(jid):
             return
         prs = Presence(to=jid, typ='available', show='chat', frm=self.jid,
                        status='Current balance: %s' % self.bitcoin.getbalance())
@@ -78,11 +78,11 @@ class BitcoimComponent:
     def presenceReceived(self, cnx, prs):
         '''Presence received'''
         typ = prs.getType()
-        frm = prs.getFrom()
+        frm = prs.getFrom().getStripped()
         if prs.getTo().getStripped() != self.jid:
             return
         if typ == 'subscribe':
-            if self.regManager.isRegistered(frm.getStripped()):
+            if self.regManager.isRegistered(frm):
                 cnx.send(Presence(typ='subscribed', frm=self.jid, to=frm))
                 self.sendBitcoinPresence(cnx, frm)
             else:
@@ -142,7 +142,7 @@ class BitcoimComponent:
             isUpdate = True # This would be stupid, since there's no registration info to update
         cnx.send(Iq(typ='result', to=frm, frm=self.jid, attrs={'id': iq.getID()}))
         if not isUpdate:
-            cnx.send(Presence(typ='subscribe', to=frm, frm=self.jid))
+            cnx.send(Presence(typ='subscribe', to=frm.getStripped(), frm=self.jid))
 
     def unregistrationRequested(self, cnx, iq):
         '''An unregistration request was received'''
