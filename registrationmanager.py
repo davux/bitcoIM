@@ -41,7 +41,7 @@ class RegistrationManager:
 
     def unregisterJid(self, jid):
         '''Remove given JID from subscribers if it exists. Raise exception otherwise.'''
-        req = "delete from %s where %s='%s'" % (TABLE_REG, FIELD_JID, '%s')
+        req = "delete from %s where %s=%s" % (TABLE_REG, FIELD_JID, '%s')
         curs = SQL().execute(req, (jid,))
         debug("Executed %s on the database." % req)
         if curs:
