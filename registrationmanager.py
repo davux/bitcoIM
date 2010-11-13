@@ -39,6 +39,26 @@ class RegistrationManager:
         SQL().execute(req, (jid,))
         SQL().commit()
 
+    def unregisterJid(self, jid):
+        '''Remove given JID from subscribers if it exists. Raise exception otherwise.'''
+        req = "delete from %s where %s='%s'" % (TABLE_REG, FIELD_JID, '%s')
+        curs = SQL().execute(req, (jid,))
+        debug("Executed %s on the database." % req)
+        if curs:
+            count = curs.rowcount
+            debug("%s rows deleted." % count)
+            if 0 == count:
+                raise AlreadyUnregisteredError
+            elif 1 != count:
+                debug("We deleted %s rows when unregistering %s. This is not normal." % (count, jid))
+        else:
+            debug("Strange. Curs is %s." % curs)
+
+
 class AlreadyRegisteredError(Exception):
     '''A JID is already registered at the gateway.'''
+    pass
+
+class AlreadyUnregisteredError(Exception):
+    '''An unregisration was asked but the JID wasn't registered at the gateway.'''
     pass

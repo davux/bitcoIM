@@ -111,7 +111,7 @@ class BitcoimComponent:
                     self.unregistrationRequested(cnx, iq)
                 else:
                     self.registrationRequested(cnx, iq)
-                    raise NodeProcessed
+                raise NodeProcessed
             elif 'get' == typ:
                 instructions = Node('instructions')
                 registered = self.regManager.isRegistered(iq.getFrom().getStripped())
@@ -147,4 +147,9 @@ class BitcoimComponent:
 
     def unregistrationRequested(self, cnx, iq):
         '''An unregistration request was received'''
-        #TODO: Check and unregister
+        frm = iq.getFrom().getStripped()
+        self.regManager.unregisterJid(frm)
+        cnx.send(iq.buildReply('result'))
+        cnx.send(Presence(to=frm, frm=self.jid, typ='unsubscribe'))
+        cnx.send(Presence(to=frm, frm=self.jid, typ='unsubscribed'))
+        cnx.send(Presence(to=frm, frm=self.jid, typ='unavailable', status='Thanks for using this service. Bye!'))
