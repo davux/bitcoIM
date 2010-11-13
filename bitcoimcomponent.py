@@ -84,7 +84,6 @@ class BitcoimComponent:
         if typ == 'subscribe':
             if self.regManager.isRegistered(frm):
                 cnx.send(Presence(typ='subscribed', frm=self.jid, to=frm))
-                self.sendBitcoinPresence(cnx, frm)
             else:
                 debug("Simple subscription request without prior registration. What should we do?")
         elif typ == 'subscribed':
@@ -95,6 +94,10 @@ class BitcoimComponent:
             debug('Unsubscribed. Any interest in this information?')
         elif typ == 'probe':
             self.sendBitcoinPresence(cnx, frm)
+        elif (typ == 'available') or (typ is None):
+            self.sendBitcoinPresence(cnx, frm)
+        elif typ == 'unavailable':
+            cnx.send(Presence(typ='unavailable', frm=self.jid, to=frm))
         elif typ == 'error':
             debug('Presence error. Just ignore it?')
         raise NodeProcessed
