@@ -10,7 +10,7 @@ class SQL(object):
     def __new__(cls):
         if cls.cache is None:
             cls.cache = object.__new__(cls)
-            cls.cache.conn = connect(db['file'])
+            cls.cache.conn = connect(db['file'], isolation_level=None)
             cls.cache.cursor = cls.cache.conn.cursor()
             cls.cache.execute = cls.cache.cursor.execute
             cls.cache.commit = cls.cache.conn.commit

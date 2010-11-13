@@ -17,7 +17,6 @@ class RegistrationManager:
         req = "select %s from %s" % (FIELD_JID, TABLE_REG)
         debug('About to execute: [%s]' % req)
         SQL().execute(req)
-        SQL().commit()
         result = SQL().fetchall()
         return [result[i][0] for i in range(len(result))]
 
@@ -27,7 +26,6 @@ class RegistrationManager:
         req = "select %s from %s where %s=?" % (FIELD_ID, TABLE_REG, FIELD_JID)
         debug('About to execute: [%s]' % req)
         SQL().execute(req, (jid,))
-        SQL().commit()
         result = SQL().fetchall()
         return (0 != len(result))
 
@@ -37,7 +35,6 @@ class RegistrationManager:
             raise AlreadyRegisteredError
         req = "insert into %s (%s) values (?)" % (TABLE_REG, FIELD_JID)
         SQL().execute(req, (jid,))
-        SQL().commit()
 
     def unregisterJid(self, jid):
         '''Remove given JID from subscribers if it exists. Raise exception otherwise.'''
