@@ -9,7 +9,7 @@ from registrationmanager import RegistrationManager, AlreadyRegisteredError
 from xmpp.client import Component
 from xmpp.protocol import JID, Iq, Presence, Error, NodeProcessed, \
                           NS_IQ, NS_MESSAGE, NS_PRESENCE, NS_DISCO_INFO, \
-                          NS_REGISTER
+                          NS_DISCO_ITEMS, NS_REGISTER
 from xmpp.simplexml import Node
 from xmpp.browser import Browser
 
@@ -49,9 +49,10 @@ class BitcoimComponent:
         browser = Browser()
         browser.PlugIn(cnx)
         ids = [{'category': 'gateway', 'type': 'bitcoin',
-               'name':app.identifier}]
-        info = {'ids': ids, 'features': [NS_DISCO_INFO, NS_REGISTER]}
-        browser.setDiscoHandler({'items': [], 'info': info})
+               'name':app.description}]
+        info = {'ids': ids, 'features': [NS_DISCO_INFO, NS_DISCO_ITEMS, NS_REGISTER]}
+        items = [{'jid': self.jid, 'name': app.description}]
+        browser.setDiscoHandler({'items': items, 'info': info})
 
     def loop(self, timeout=0):
         '''Main loop. Listen to incoming stanzas.'''
