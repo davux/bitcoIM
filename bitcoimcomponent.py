@@ -10,6 +10,7 @@ from xmpp.client import Component
 from xmpp.protocol import JID, Iq, Presence, Error, NodeProcessed, \
                           NS_IQ, NS_MESSAGE, NS_PRESENCE, NS_DISCO_INFO, \
                           NS_REGISTER
+from xmpp.simplexml import Node
 from xmpp.browser import Browser
 
 class BitcoimComponent:
@@ -112,7 +113,16 @@ class BitcoimComponent:
                     self.registrationRequested(cnx, iq)
                     raise NodeProcessed
             elif 'get' == typ:
-                debug("Information requested about future or existing registration. TODO: reply.")
+                instructions = Node('instructions')
+                if self.regManager.isRegistered(iq.getFrom().getStripped()):
+                    instructions.setData('There is no registration information to update. Simple as that.')
+                else:
+                    instructions.setData('Register? If you do, you\'ll get a Bitcoin address that you can use to send and receive payments via Bitcoin.')
+                reply = iq.buildReply('result')
+                query = reply.getTag('query')
+                query.addChild(node=instructions)
+                cnx.send(reply)
+                raise NodeProcessed
             else:
                 debug("Unknown IQ with ns '%s' and type '%s'. TODO: reply with an error." % (ns, typ))
         else:
