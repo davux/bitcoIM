@@ -65,7 +65,7 @@ class BitcoimComponent:
     def sendBitcoinPresence(self, cnx, jid):
         if not self.regManager.isRegistered(jid.getStripped()):
             return
-        prs = Presence(to=jid, typ='chat', show='online', frm=self.jid,
+        prs = Presence(to=jid, typ='available', show='chat', frm=self.jid,
                        status='Current balance: %s' % self.bitcoin.getbalance())
         cnx.send(prs)
 
