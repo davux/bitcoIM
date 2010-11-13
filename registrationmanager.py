@@ -30,3 +30,15 @@ class RegistrationManager:
         SQL().commit()
         result = SQL().fetchall()
         return (0 != len(result))
+
+    def registerJid(self, jid):
+        '''Add given JID to subscribers if possible. Raise exception otherwise.'''
+        if self.isRegistered:
+            raise AlreadyRegisteredError
+        req = "insert into %s (%s) values (%s)" % (TABLE_REG, FIELD_JID, '%s')
+        SQL().execute(req, (jid,))
+        SQL().commit()
+
+class AlreadyRegisteredError(Exception):
+    '''A JID is already registered at the gateway.'''
+    pass
