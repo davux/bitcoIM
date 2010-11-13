@@ -114,17 +114,21 @@ class BitcoimComponent:
                     raise NodeProcessed
             elif 'get' == typ:
                 instructions = Node('instructions')
-                if self.regManager.isRegistered(iq.getFrom().getStripped()):
+                registered = self.regManager.isRegistered(iq.getFrom().getStripped())
+                if registered:
                     instructions.setData('There is no registration information to update. Simple as that.')
                 else:
                     instructions.setData('Register? If you do, you\'ll get a Bitcoin address that you can use to send and receive payments via Bitcoin.')
                 reply = iq.buildReply('result')
                 query = reply.getTag('query')
+                if registered:
+                    query.addChild(node=Node('registered'))
                 query.addChild(node=instructions)
                 cnx.send(reply)
                 raise NodeProcessed
             else:
-                debug("Unknown IQ with ns '%s' and type '%s'. TODO: reply with an error." % (ns, typ))
+                # Unkown namespace and type. The default handler will take care of it if we don't raise NodeProcessed.
+                debug("Unknown IQ with ns '%s' and type '%s'." % (ns, typ))
         else:
             debug("Unhandled IQ namespace '%s'. TODO: handle it!" % ns)
 
