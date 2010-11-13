@@ -33,7 +33,7 @@ class RegistrationManager:
 
     def registerJid(self, jid):
         '''Add given JID to subscribers if possible. Raise exception otherwise.'''
-        if self.isRegistered:
+        if self.isRegistered(jid):
             raise AlreadyRegisteredError
         req = "insert into %s (%s) values (?)" % (TABLE_REG, FIELD_JID)
         SQL().execute(req, (jid,))
