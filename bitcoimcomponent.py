@@ -49,7 +49,7 @@ class BitcoimComponent:
         browser.PlugIn(cnx)
         ids = [{'category': 'gateway', 'type': 'bitcoin',
                'name':app.identifier}]
-        info = {'ids': ids, 'features': [NS_DISCO_INFO]}
+        info = {'ids': ids, 'features': [NS_DISCO_INFO, NS_REGISTER]}
         browser.setDiscoHandler({'items': [], 'info': info})
 
     def loop(self, timeout=0):
