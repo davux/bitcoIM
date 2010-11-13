@@ -24,7 +24,7 @@ class RegistrationManager:
     def isRegistered(self, jid):
         '''Return whether a given JID is already registered.'''
         debug('We want to know whether %s is registered.' % jid)
-        req = "select %s from %s where %s=%s" % (FIELD_ID, TABLE_REG, FIELD_JID, '%s')
+        req = "select %s from %s where %s=?" % (FIELD_ID, TABLE_REG, FIELD_JID)
         debug('About to execute: [%s]' % req)
         SQL().execute(req, (jid,))
         SQL().commit()
@@ -35,13 +35,13 @@ class RegistrationManager:
         '''Add given JID to subscribers if possible. Raise exception otherwise.'''
         if self.isRegistered:
             raise AlreadyRegisteredError
-        req = "insert into %s (%s) values (%s)" % (TABLE_REG, FIELD_JID, '%s')
+        req = "insert into %s (%s) values (?)" % (TABLE_REG, FIELD_JID)
         SQL().execute(req, (jid,))
         SQL().commit()
 
     def unregisterJid(self, jid):
         '''Remove given JID from subscribers if it exists. Raise exception otherwise.'''
-        req = "delete from %s where %s=%s" % (TABLE_REG, FIELD_JID, '%s')
+        req = "delete from %s where %s=?" % (TABLE_REG, FIELD_JID)
         curs = SQL().execute(req, (jid,))
         debug("Executed %s on the database." % req)
         if curs:

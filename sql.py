@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # vi: sts=4 et sw=4
 
-from sqlite import connect
+from sqlite3 import connect
 from conf import db
 
 class SQL(object):

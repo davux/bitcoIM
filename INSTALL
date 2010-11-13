@@ -9,4 +9,4 @@ database used to store registrations.
 Also create the table in the database using the file
 'registrations.sql'. For example, is the file name of the
 database is registrations.db, simply run from the command line:
-$ sqlite < registrations.sql registrations.db
+$ sqlite3 < registrations.sql registrations.db
