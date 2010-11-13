@@ -9,7 +9,7 @@ from registrationmanager import RegistrationManager, AlreadyRegisteredError
 from xmpp.client import Component
 from xmpp.protocol import JID, Iq, Presence, Error, NodeProcessed, \
                           NS_IQ, NS_MESSAGE, NS_PRESENCE, NS_DISCO_INFO, \
-                          NS_DISCO_ITEMS, NS_REGISTER
+                          NS_DISCO_ITEMS, NS_REGISTER, NS_VERSION
 from xmpp.simplexml import Node
 from xmpp.browser import Browser
 
@@ -135,6 +135,17 @@ class BitcoimComponent:
             else:
                 # Unkown namespace and type. The default handler will take care of it if we don't raise NodeProcessed.
                 debug("Unknown IQ with ns '%s' and type '%s'." % (ns, typ))
+        elif (NS_VERSION == ns) and ('get' == typ):
+            name = Node('name')
+            name.setData(app.name)
+            version = Node('version')
+            version.setData(app.version)
+            reply = iq.buildReply('result')
+            query = reply.getTag('query')
+            query.addChild(node=name)
+            query.addChild(node=version)
+            cnx.send(reply)
+            raise NodeProcessed
         else:
             debug("Unhandled IQ namespace '%s'. TODO: handle it!" % ns)
 
