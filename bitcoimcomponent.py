@@ -60,6 +60,9 @@ class BitcoimComponent:
 
     def sayGoodbye(self):
         '''Ending method. Doesn't do anything interesting yet.'''
+        for jid in self.regManager.getAllContacts():
+            self.cnx.send(Presence(to=jid, frm=self.jid, typ='unavailable',
+                          status='Service is shutting down. See you later.'))
         debug("Bye.")
 
     def sendBitcoinPresence(self, cnx, jid):
