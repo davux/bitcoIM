@@ -79,8 +79,7 @@ class BitcoimComponent:
         '''Presence received'''
         typ = prs.getType()
         frm = prs.getFrom()
-        to = prs.getTo().getStripped()
-        if to != self.jid:
+        if prs.getTo().getStripped() != self.jid:
             return
         if typ == 'subscribe':
             if self.regManager.isRegistered(frm.getStripped()):
