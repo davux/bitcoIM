@@ -5,10 +5,11 @@ import app
 from common import problem, debug
 from conf import bitcoin as bitcoin_conf
 from jsonrpc import ServiceProxy
-from registrationmanager import RegistrationManager
+from registrationmanager import RegistrationManager, AlreadyRegisteredError
 from xmpp.client import Component
-from xmpp.protocol import JID, Presence, Error, NodeProcessed, \
-                          NS_IQ, NS_MESSAGE, NS_PRESENCE, NS_DISCO_INFO
+from xmpp.protocol import JID, Iq, Presence, Error, NodeProcessed, \
+                          NS_IQ, NS_MESSAGE, NS_PRESENCE, NS_DISCO_INFO, \
+                          NS_REGISTER
 from xmpp.browser import Browser
 
 class BitcoimComponent:
@@ -38,6 +39,7 @@ class BitcoimComponent:
         self.regManager = RegistrationManager()
         for jid in self.regManager.getAllContacts():
             self.cnx.send(Presence(to=jid, frm=self.jid, typ='probe'))
+            self.sendBitcoinPresence(self.cnx, JID(jid))
 
     def handleDisco(self, cnx):
         '''Define the Service Discovery information for automatic handling
@@ -59,6 +61,13 @@ class BitcoimComponent:
         '''Ending method. Doesn't do anything interesting yet.'''
         debug("Bye.")
 
+    def sendBitcoinPresence(self, cnx, jid):
+        if not self.regManager.isRegistered(jid.getStripped()):
+            return
+        prs = Presence(to=jid, typ='chat', show='online', frm=self.jid,
+                       status='Current balance: %s' % self.bitcoin.getbalance())
+        cnx.send(prs)
+
     def messageReceived(self, cnx, msg):
         '''Message received'''
         if not self.regManager.isRegistered(msg.getFrom().getStripped()):
@@ -73,27 +82,55 @@ class BitcoimComponent:
         if to != self.jid:
             return
         if typ == 'subscribe':
-            self.subscriptionRequested(cnx, prs)
+            if self.regManager.isRegistered(frm.getStripped()):
+                cnx.send(Presence(typ='subscribed', frm=self.jid, to=frm))
+                self.sendBitcoinPresence(cnx, frm)
+            else:
+                debug("Simple subscription request without prior registration. What should we do?")
         elif typ == 'subscribed':
-            debug('Subscribed. Any interest in this information?')
-        elif typ in ['unsubscribe', 'unsubscribed']:
-            self.unsubscriptionRequested(cnx, prs)
+            debug('We were allowed to see %s\'s presence.')
+        elif typ == 'unsubscribe':
+            debug('Just received an "unsubscribe" presence stanza. What does that mean?')
+        elif typ == 'unsubscribed':
+            debug('Unsubscribed. Any interest in this information?')
         elif typ == 'probe':
-            if not self.regManager.isRegistered(prs.getFrom().getStripped()):
-                return
-            prs = Presence(to=frm, type='chat', show='online', frm=self.jid,
-                           status='Current balance: %s' % self.bitcoin.getbalance())
-            self.cnx.send(prs)
+            self.sendBitcoinPresence(cnx, frm)
         elif typ == 'error':
             debug('Presence error. Just ignore it?')
+        raise NodeProcessed
 
     def iqReceived(self, cnx, iq):
         '''IQ received'''
+        typ = iq.getType()
+        ns = iq.getQueryNS()
+        if NS_REGISTER == ns:
+            if 'set' == typ:
+                children = iq.getQueryChildren()
+                if (0 != len(children)) and ('remove' == children[0].getName()):
+                    self.unregistrationRequested(cnx, iq)
+                else:
+                    self.registrationRequested(cnx, iq)
+                    raise NodeProcessed
+            elif 'get' == typ:
+                debug("Information requested about future or existing registration. TODO: reply.")
+            else:
+                debug("Unknown IQ with ns '%s' and type '%s'. TODO: reply with an error." % (ns, typ))
+        else:
+            debug("Unhandled IQ namespace '%s'. TODO: handle it!" % ns)
 
-    def subscriptionRequested(self, cnx, prs):
-        '''A subscription request was received'''
-        debug("Subscription request from %s" % prs.getFrom())
+    def registrationRequested(self, cnx, iq):
+        '''A registration request was received'''
+        frm = iq.getFrom()
+        debug("Registration request from %s" % frm)
+        update = False
+        try:
+            self.regManager.registerJid(frm.getStripped())
+        except AlreadyRegisteredError:
+            isUpdate = True # This would be stupid, since there's no registration info to update
+        cnx.send(Iq(typ='result', to=frm, frm=self.jid, attrs={'id': iq.getID()}))
+        if not isUpdate:
+            cnx.send(Presence(typ='subscribe', to=frm, frm=self.jid))
 
-    def unsubscriptionRequested(self, cnx, prs):
-        '''An unsubscription request was received'''
-        debug("User %s unsubscribed!" % prs.getFrom())
+    def unregistrationRequested(self, cnx, iq):
+        '''An unregistration request was received'''
+        #TODO: Check and unregister
