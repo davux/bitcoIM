@@ -136,7 +136,7 @@ class BitcoimComponent:
         '''A registration request was received'''
         frm = iq.getFrom()
         debug("Registration request from %s" % frm)
-        update = False
+        isUpdate = False
         try:
             self.regManager.registerJid(frm.getStripped())
         except AlreadyRegisteredError:
