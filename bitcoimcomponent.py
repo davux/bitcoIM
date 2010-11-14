@@ -22,9 +22,9 @@ class BitcoimComponent:
            - Declare handlers
         '''
         self.bye = False
-        self.cnx = Component(server, port, debug=['socket'])
+        self.cnx = Component(jid, port, debug=['socket'])
         self.jid = jid
-        if not self.cnx.connect():
+        if not self.cnx.connect([server, port]):
             raise Exception('Unable to connect to %s:%s' % (server, port))
         if not self.cnx.auth(jid, password):
             raise Exception('Unable to authenticate as %s' % (jid))
