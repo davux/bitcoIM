@@ -83,7 +83,7 @@ class BitcoimComponent:
         typ = prs.getType()
         frm = prs.getFrom().getStripped()
         if prs.getTo().getStripped() != self.jid:
-            return
+            return # TODO: handle presence requests to hosted addresses
         if typ == 'subscribe':
             if self.regManager.isRegistered(frm):
                 cnx.send(Presence(typ='subscribed', frm=self.jid, to=frm))
@@ -146,7 +146,7 @@ class BitcoimComponent:
             cnx.send(reply)
             raise NodeProcessed
         else:
-            debug("Unhandled IQ namespace '%s'. TODO: handle it!" % ns)
+            debug("Unhandled IQ namespace '%s'." % ns)
 
     def registrationRequested(self, cnx, iq):
         '''A registration request was received'''
