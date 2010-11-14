@@ -40,7 +40,6 @@ class BitcoimComponent:
         self.regManager = RegistrationManager()
         for jid in self.regManager.getAllContacts():
             self.cnx.send(Presence(to=jid, frm=self.jid, typ='probe'))
-            self.sendBitcoinPresence(self.cnx, JID(jid))
 
     def handleDisco(self, cnx):
         '''Define the Service Discovery information for automatic handling
