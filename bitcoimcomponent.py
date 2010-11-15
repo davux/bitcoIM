@@ -152,6 +152,7 @@ class BitcoimComponent:
         isUpdate = False
         try:
             frm.register()
+            #TODO: Create a first address for that user and send a welcome message.
         except AlreadyRegisteredError:
             isUpdate = True # This would be stupid, since there's no registration info to update
         cnx.send(Iq(typ='result', to=frm, frm=self.jid, attrs={'id': iq.getID()}))
@@ -163,6 +164,7 @@ class BitcoimComponent:
         frm = UserAccount(iq.getFrom())
         try:
             frm.unregister()
+            #TODO: Destroy all information about that user's addresses
         except AlreadyUnregisteredError:
             pass # We don't really mind about unknown people wanting to unregister. Should we?
         cnx.send(iq.buildReply('result'))
