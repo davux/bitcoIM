@@ -5,7 +5,7 @@ import app
 from common import problem, debug
 from conf import bitcoin as bitcoin_conf
 from jsonrpc import ServiceProxy
-from registrationmanager import RegistrationManager, AlreadyRegisteredError
+from useraccount import UserAccount, AlreadyRegisteredError
 from xmpp.client import Component
 from xmpp.protocol import JID, Iq, Presence, Error, NodeProcessed, \
                           NS_IQ, NS_MESSAGE, NS_PRESENCE, NS_DISCO_INFO, \
@@ -37,8 +37,7 @@ class BitcoimComponent:
         self.cnx.RegisterHandler(NS_PRESENCE, self.presenceReceived)
         self.cnx.RegisterHandler(NS_IQ, self.iqReceived)
         self.handleDisco(self.cnx)
-        self.regManager = RegistrationManager()
-        for jid in self.regManager.getAllContacts():
+        for jid in UserAccount.getAllContacts():
             self.cnx.send(Presence(to=jid, frm=self.jid, typ='probe'))
 
     def handleDisco(self, cnx):
@@ -60,32 +59,32 @@ class BitcoimComponent:
 
     def sayGoodbye(self):
         '''Ending method. Doesn't do anything interesting yet.'''
-        for jid in self.regManager.getAllContacts():
+        for jid in UserAccount.getAllContacts():
             self.cnx.send(Presence(to=jid, frm=self.jid, typ='unavailable',
                           status='Service is shutting down. See you later.'))
         debug("Bye.")
 
-    def sendBitcoinPresence(self, cnx, jid):
-        if not self.regManager.isRegistered(jid):
+    def sendBitcoinPresence(self, cnx, user):
+        if not user.isRegistered():
             return
-        prs = Presence(to=jid, typ='available', show='online', frm=self.jid,
+        prs = Presence(to=user, typ='available', show='online', frm=self.jid,
                        status='Current balance: %s' % self.bitcoin.getbalance())
         cnx.send(prs)
 
     def messageReceived(self, cnx, msg):
         '''Message received'''
-        if not self.regManager.isRegistered(msg.getFrom().getStripped()):
+        if not UserAccount(msg.getFrom()).isRegistered():
             return
         debug("Message received from subscriber %s" % msg.getBody())
 
     def presenceReceived(self, cnx, prs):
         '''Presence received'''
         typ = prs.getType()
-        frm = prs.getFrom().getStripped()
+        frm = UserAccount(prs.getFrom())
         if prs.getTo().getStripped() != self.jid:
             return # TODO: handle presence requests to hosted addresses
         if typ == 'subscribe':
-            if self.regManager.isRegistered(frm):
+            if frm.isRegistered():
                 cnx.send(Presence(typ='subscribed', frm=self.jid, to=frm))
             else:
                 debug("Simple subscription request without prior registration. What should we do?")
@@ -119,7 +118,7 @@ class BitcoimComponent:
                 raise NodeProcessed
             elif 'get' == typ:
                 instructions = Node('instructions')
-                registered = self.regManager.isRegistered(iq.getFrom().getStripped())
+                registered = UserAccount(iq.getFrom()).isRegistered()
                 if registered:
                     instructions.setData('There is no registration information to update. Simple as that.')
                 else:
@@ -150,11 +149,11 @@ class BitcoimComponent:
 
     def registrationRequested(self, cnx, iq):
         '''A registration request was received'''
-        frm = iq.getFrom()
+        frm = UserAccount(iq.getFrom())
         debug("Registration request from %s" % frm)
         isUpdate = False
         try:
-            self.regManager.registerJid(frm.getStripped())
+            frm.register()
         except AlreadyRegisteredError:
             isUpdate = True # This would be stupid, since there's no registration info to update
         cnx.send(Iq(typ='result', to=frm, frm=self.jid, attrs={'id': iq.getID()}))
@@ -163,8 +162,8 @@ class BitcoimComponent:
 
     def unregistrationRequested(self, cnx, iq):
         '''An unregistration request was received'''
-        frm = iq.getFrom().getStripped()
-        self.regManager.unregisterJid(frm)
+        frm = UserAccount(iq.getFrom())
+        frm.unregister()
         cnx.send(iq.buildReply('result'))
         cnx.send(Presence(to=frm, frm=self.jid, typ='unsubscribe'))
         cnx.send(Presence(to=frm, frm=self.jid, typ='unsubscribed'))
