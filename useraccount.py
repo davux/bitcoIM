@@ -2,6 +2,8 @@
 # vi: sts=4 et sw=4
 
 from common import debug
+from conf import bitcoin as bitcoin_conf
+from jsonrpc import ServiceProxy
 from sql import SQL
 from xmpp.protocol import JID
 
@@ -11,6 +13,8 @@ TABLE_REG = 'registrations'
 
 class UserAccount(JID):
     '''Represents a user that's registered on the gateway.'''
+
+    bitcoin = ServiceProxy("http://%s:%s@127.0.0.1:8332" % (bitcoin_conf['user'], bitcoin_conf['password']))
 
     def __init__(self, jid=None, node='', domain='', resource=''):
         '''Constructor. Initializes an account based on their JID.'''
@@ -56,6 +60,10 @@ class UserAccount(JID):
         else:
             debug("Strange. Curs is %s." % curs)
 
+    def getBalance(self):
+        '''Return the user's current balance'''
+        #XXX: This is wrong. The user's balance is only a fraction of the whole wallet's.
+        return self.bitcoin.getbalance()
 
 class AlreadyRegisteredError(Exception):
     '''A JID is already registered at the gateway.'''
