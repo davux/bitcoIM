@@ -163,7 +163,10 @@ class BitcoimComponent:
     def unregistrationRequested(self, cnx, iq):
         '''An unregistration request was received'''
         frm = UserAccount(iq.getFrom())
-        frm.unregister()
+        try:
+            frm.unregister()
+        except AlreadyUnregisteredError:
+            pass # We don't really mind about unknown people wanting to unregister. Should we?
         cnx.send(iq.buildReply('result'))
         cnx.send(Presence(to=frm, frm=self.jid, typ='unsubscribe'))
         cnx.send(Presence(to=frm, frm=self.jid, typ='unsubscribed'))
