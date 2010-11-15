@@ -32,8 +32,7 @@ class UserAccount(JID):
         req = "select %s from %s where %s=?" % (FIELD_ID, TABLE_REG, FIELD_JID)
         debug('About to execute: [%s]' % req)
         SQL().execute(req, (unicode(self.jid),))
-        result = SQL().fetchall()
-        return (0 != len(result))
+        return SQL().fetchone() is not None
 
     def register(self):
         '''Add given JID to subscribers if possible. Raise exception otherwise.'''
