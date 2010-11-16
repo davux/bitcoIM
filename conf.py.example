@@ -7,7 +7,7 @@ component = { 'jid': 'name-of-the-component',
               'port': 4242,
             }
 
-db = {'file': 'registrations.db'}
+db = {'file': 'bitcoim.db'}
 
 bitcoin = {'user': 'rpc-user',
            'password': 'rpc-password',

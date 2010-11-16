@@ -4,9 +4,10 @@ In the 'component' section, set up the credentials that should be used
 to connect as a component to the Jabber server.
 
 The 'db' section is used to set up the file name of the SQLite
-database used to store registrations.
+database that the program stores its persistent data in (registrations,
+bitcoin addresses, users' balances, etc.).
 
-Also create the table in the database using the file
-'registrations.sql'. For example, is the file name of the
-database is registrations.db, simply run from the command line:
-$ sqlite3 < registrations.sql registrations.db
+You need to create the database using the file 'db_structure.sql'.
+For example, is the file name of the database is bitcoim.db, simply
+run from the command line:
+$ sqlite3 < db_structure.sql bitcoim.db
