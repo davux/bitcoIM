@@ -15,6 +15,7 @@ class UserAccount(JID):
     '''Represents a user that's registered on the gateway.'''
 
     bitcoin = ServiceProxy("http://%s:%s@127.0.0.1:8332" % (bitcoin_conf['user'], bitcoin_conf['password']))
+    bitcoin.getinfo() # Testing the connection early, so that an exception can be raised if it doesn't work
 
     def __init__(self, jid=None, node='', domain='', resource=''):
         '''Constructor. Initializes an account based on their JID.'''

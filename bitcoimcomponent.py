@@ -4,7 +4,11 @@
 import app
 from common import problem, debug
 from conf import bitcoin as bitcoin_conf
-from useraccount import UserAccount, AlreadyRegisteredError
+try:
+    from useraccount import UserAccount, AlreadyRegisteredError, \
+                            BitcoinClientNotAvailableError
+except IOError:
+        raise IOError("Connection problem with bitcoin client!")
 from xmpp.client import Component
 from xmpp.protocol import JID, Iq, Presence, Error, NodeProcessed, \
                           NS_IQ, NS_MESSAGE, NS_PRESENCE, NS_DISCO_INFO, \
@@ -27,10 +31,6 @@ class BitcoimComponent:
             raise Exception('Unable to connect to %s:%s' % (server, port))
         if not self.cnx.auth(jid, password):
             raise Exception('Unable to authenticate as %s' % (jid))
-        try:
-            debug("Connected to bitcoin.")
-        except IOError:
-            raise Exception('Unable to connect to JSON server as %s' % (bitcoin_conf['user']))
         self.cnx.RegisterHandler(NS_MESSAGE, self.messageReceived)
         self.cnx.RegisterHandler(NS_PRESENCE, self.presenceReceived)
         self.cnx.RegisterHandler(NS_IQ, self.iqReceived)

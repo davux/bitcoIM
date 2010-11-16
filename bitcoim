@@ -11,7 +11,11 @@ try:
     from xmpp import client, protocol
 except ImportError:
     problem("Error: this program needs the Python XMPP library.", True)
-from bitcoimcomponent import BitcoimComponent
+
+try:
+    from bitcoimcomponent import BitcoimComponent
+except IOError, message:
+    problem("Communication error: %s" % (message), True)
 
 try:
     bitcoim = BitcoimComponent(info['jid'], info['password'],
