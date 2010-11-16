@@ -46,7 +46,7 @@ class BitcoimComponent:
         browser.PlugIn(cnx)
         ids = [{'category': 'gateway', 'type': 'bitcoin',
                'name':app.description}]
-        info = {'ids': ids, 'features': [NS_DISCO_INFO, NS_DISCO_ITEMS, NS_REGISTER]}
+        info = {'ids': ids, 'features': [NS_DISCO_INFO, NS_DISCO_ITEMS, NS_REGISTER, NS_VERSION]}
         items = [{'jid': self.jid, 'name': app.description}]
         browser.setDiscoHandler({'items': items, 'info': info})
 
