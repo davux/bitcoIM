@@ -2,7 +2,8 @@
 # vi: sts=4 et sw=4
 
 import app
-from bitcoin.address import Address, InvalidBitcoinAddressError
+from bitcoimaddress import BitcoIMAddress
+from bitcoin.address import InvalidBitcoinAddressError
 from bitcoin.controller import Controller, BitcoinServerIOError
 from common import problem, debug
 from conf import bitcoin as bitcoin_conf
@@ -75,15 +76,12 @@ class BitcoIMComponent:
         label = address.getLabel()
         if 0 != len(label):
             msg += ' (%s)' % label
-        pres = Presence(typ='subscribe', status=msg, frm=self.address2jid(address), to=user)
+        pres = Presence(typ='subscribe', status=msg, frm=address.asJID(), to=user)
         nick = Node('nick')
         nick.setNamespace(NS_NICK)
         nick.setData(label)
         pres.addChild(node=nick)
         cnx.send(pres)
-
-    def address2jid(self, address):
-        return JID(node=str(address), domain=self.jid)
 
     def messageReceived(self, cnx, msg):
         '''Message received'''
@@ -119,7 +117,7 @@ class BitcoIMComponent:
                 debug('Presence error. Just ignore it?')
         else:
             try:
-                address = Address(JID(prs.getTo()).getNode())
+                address = BitcoIMAddress(JID(prs.getTo()).getNode())
             except InvalidBitcoinAddressError:
                 raise NodeProcessed # Just drop the case. TODO: Handle invalid addresses better
             if not frm.ownsAddress(address):

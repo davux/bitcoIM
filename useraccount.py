@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # vi: sts=4 et sw=4
 
-from bitcoin.address import Address
+from bitcoimaddress import BitcoIMAddress
 from bitcoin.controller import Controller
 from common import debug
 from conf import bitcoin as bitcoin_conf
@@ -72,7 +72,7 @@ class UserAccount(JID):
 
     def createAddress(self, label=None):
         '''Create a new bitcoin address, associate it with the user, and return it'''
-        address = Address()
+        address = BitcoIMAddress()
         if label is not None:
             address.setLabel(label)
         req = "insert into %s (%s, %s) values (?, ?)" % (TABLE_ADDR, FIELD_ADDRESS, FIELD_JID)
