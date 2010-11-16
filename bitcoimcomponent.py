@@ -2,16 +2,16 @@
 # vi: sts=4 et sw=4
 
 import app
+from bitcoin.address import Address, InvalidBitcoinAddressError
+from bitcoin.controller import Controller, BitcoinServerIOError
 from common import problem, debug
 from conf import bitcoin as bitcoin_conf
-try:
-    from useraccount import UserAccount, AlreadyRegisteredError
-except IOError:
-        raise IOError("Connection problem with bitcoin client!")
+from useraccount import UserAccount, AlreadyRegisteredError
 from xmpp.client import Component
 from xmpp.protocol import JID, Iq, Presence, Error, NodeProcessed, \
                           NS_IQ, NS_MESSAGE, NS_PRESENCE, NS_DISCO_INFO, \
                           NS_DISCO_ITEMS, NS_REGISTER, NS_VERSION
+from protocol import NS_NICK
 from xmpp.simplexml import Node
 from xmpp.browser import Browser
 
@@ -24,6 +24,7 @@ class BitcoimComponent:
            - Declare handlers
         '''
         self.bye = False
+        Controller(bitcoin_conf['user'], bitcoin_conf['password']).getinfo() # This will raise an exception if there's a connection problem
         self.cnx = Component(jid, port, debug=['socket'])
         self.jid = jid
         if not self.cnx.connect([server, port]):
@@ -61,12 +62,28 @@ class BitcoimComponent:
                           status='Service is shutting down. See you later.'))
         debug("Bye.")
 
-    def sendBitcoinPresence(self, cnx, user):
+    def sendBitcoinPresence(self, cnx, user, address=None):
         if not user.isRegistered():
             return
+        #TODO: If address exists, don't show any status message, and change the "from"
         prs = Presence(to=user, typ='available', show='online', frm=self.jid,
                        status='Current balance: %s' % user.getBalance())
         cnx.send(prs)
+
+    def addAddressToRoster(self, cnx, address, user):
+        msg = 'Hi! I\'m your new Bitcoin address'
+        label = address.getLabel()
+        if 0 != len(label):
+            msg += ' (%s)' % label
+        pres = Presence(typ='subscribe', status=msg, frm=self.address2jid(address), to=user)
+        nick = Node('nick')
+        nick.setNamespace(NS_NICK)
+        nick.setData(label)
+        pres.addChild(node=nick)
+        cnx.send(pres)
+
+    def address2jid(self, address):
+        return JID(node=str(address), domain=self.jid)
 
     def messageReceived(self, cnx, msg):
         '''Message received'''
@@ -79,27 +96,44 @@ class BitcoimComponent:
     def presenceReceived(self, cnx, prs):
         '''Presence received'''
         frm = UserAccount(prs.getFrom())
+        to = prs.getTo().getStripped()
         if not frm.isRegistered():
             return #TODO: Send a registration-required error
-        if prs.getTo().getStripped() != self.jid:
-            return # TODO: handle presence requests to hosted addresses
         typ = prs.getType()
-        if typ == 'subscribe':
-            cnx.send(Presence(typ='subscribed', frm=self.jid, to=frm))
-        elif typ == 'subscribed':
-            debug('We were allowed to see %s\'s presence.' % frm)
-        elif typ == 'unsubscribe':
-            debug('Just received an "unsubscribe" presence stanza. What does that mean?')
-        elif typ == 'unsubscribed':
-            debug('Unsubscribed. Any interest in this information?')
-        elif typ == 'probe':
-            self.sendBitcoinPresence(cnx, frm)
-        elif (typ == 'available') or (typ is None):
-            self.sendBitcoinPresence(cnx, frm)
-        elif typ == 'unavailable':
-            cnx.send(Presence(typ='unavailable', frm=self.jid, to=frm))
-        elif typ == 'error':
-            debug('Presence error. Just ignore it?')
+        if to == self.jid:
+            if typ == 'subscribe':
+                cnx.send(Presence(typ='subscribed', frm=to, to=frm))
+            elif typ == 'subscribed':
+                debug('We were allowed to see %s\'s presence.' % frm)
+            elif typ == 'unsubscribe':
+                debug('Just received an "unsubscribe" presence stanza. What does that mean?')
+            elif typ == 'unsubscribed':
+                debug('Unsubscribed. Any interest in this information?')
+            elif typ == 'probe':
+                self.sendBitcoinPresence(cnx, frm)
+            elif (typ == 'available') or (typ is None):
+                self.sendBitcoinPresence(cnx, frm)
+            elif typ == 'unavailable':
+                cnx.send(Presence(typ='unavailable', frm=to, to=frm))
+            elif typ == 'error':
+                debug('Presence error. Just ignore it?')
+        else:
+            try:
+                address = Address(JID(prs.getTo()).getNode())
+            except InvalidBitcoinAddressError:
+                raise NodeProcessed # Just drop the case. TODO: Handle invalid addresses better
+            if not frm.ownsAddress(address):
+                raise NodeProcessed # Just drop the case. TODO: Reply an error ("not-authorized" or something)
+            if typ == 'subscribe':
+                cnx.send(Presence(typ='subscribed', frm=to, to=frm))
+            elif typ == 'unsubscribe':
+                debug('%s doesn\'t want to see address %s anymore. We should really honor that.') #TODO: Implement hiding of addresses
+            elif typ == 'probe':
+                self.sendBitcoinPresence(cnx, frm, address)
+            elif (typ == 'available') or (typ is None):
+                self.sendBitcoinPresence(cnx, frm, address) # Funny way to show/hide addresses: send them directed presence
+            elif typ == 'unavailable':
+                cnx.send(Presence(typ='unavailable', frm=to, to=frm)) # Funny way to show/hide addresses: send them directed presence
         raise NodeProcessed
 
     def iqReceived(self, cnx, iq):
@@ -152,8 +186,8 @@ class BitcoimComponent:
         isUpdate = False
         try:
             frm.register()
-            frm.createAddress('My first address at %s' % self.jid)
-            #TODO: Send a welcome message.
+            new_address = frm.createAddress('My first address at %s' % self.jid)
+            self.addAddressToRoster(cnx, new_address, frm)
         except AlreadyRegisteredError:
             isUpdate = True # This would be stupid, since there's no registration info to update
         cnx.send(Iq(typ='result', to=frm, frm=self.jid, attrs={'id': iq.getID()}))

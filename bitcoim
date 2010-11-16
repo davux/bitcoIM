@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # vi: sts=4 et sw=4
 
+from bitcoin.controller import BitcoinServerIOError
 from common import problem, debug
 try:
     from conf import component as info
@@ -11,15 +12,13 @@ try:
     from xmpp import client, protocol
 except ImportError:
     problem("Error: this program needs the Python XMPP library.", True)
-
-try:
-    from bitcoimcomponent import BitcoimComponent
-except IOError, message:
-    problem("Communication error: %s" % (message), True)
+from bitcoimcomponent import BitcoimComponent
 
 try:
     bitcoim = BitcoimComponent(info['jid'], info['password'],
-                             info['server'], info['port'])
+                               info['server'], info['port'])
+except BitcoinServerIOError:
+    problem("Communication error with bitcoin client")
 except Exception, message:
     problem("Error while connecting to server: %s" % (message), True)
 try:

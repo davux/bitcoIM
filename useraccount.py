@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 # vi: sts=4 et sw=4
 
+from bitcoin.address import Address
+from bitcoin.controller import Controller
 from common import debug
 from conf import bitcoin as bitcoin_conf
-from jsonrpc import ServiceProxy
 from sql import SQL
 from xmpp.protocol import JID
 
@@ -15,9 +16,6 @@ FIELD_ADDRESS = 'address'
 
 class UserAccount(JID):
     '''Represents a user that's registered on the gateway.'''
-
-    bitcoin = ServiceProxy("http://%s:%s@127.0.0.1:8332" % (bitcoin_conf['user'], bitcoin_conf['password']))
-    bitcoin.getinfo() # Testing the connection early, so that an exception can be raised if it doesn't work
 
     def __init__(self, jid=None, node='', domain='', resource=''):
         '''Constructor. Initializes an account based on their JID.'''
@@ -68,17 +66,23 @@ class UserAccount(JID):
         '''Return the user's current balance'''
         total_received = 0
         for address in self.getAddresses():
-            total_received += self.bitcoin.getreceivedbyaddress(address)
+            total_received += Controller().getreceivedbyaddress(address)
         #TODO: Substract payments made by this user, when they can made them
         return total_received
 
-    def createAddress(self, label=''):
+    def createAddress(self, label=None):
         '''Create a new bitcoin address, associate it with the user, and return it'''
-        address = self.bitcoin.getnewaddress(label)
+        address = Address()
+        if label is not None:
+            address.setLabel(label)
         req = "insert into %s (%s, %s) values (?, ?)" % (TABLE_ADDR, FIELD_ADDRESS, FIELD_JID)
-        SQL().execute(req, (address, self.jid))
+        SQL().execute(req, (str(address), self.jid))
         #TODO: Check that the creation went well before returning the address
         return address
+
+    def ownsAddress(self, address):
+        address = str(address)
+        return True #TODO: Check whether the user really owns this address
 
 class AlreadyRegisteredError(Exception):
     '''A JID is already registered at the gateway.'''
