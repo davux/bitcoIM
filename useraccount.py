@@ -10,6 +10,8 @@ from xmpp.protocol import JID
 FIELD_ID = 'id'
 FIELD_JID = 'registered_jid'
 TABLE_REG = 'registrations'
+TABLE_ADDR = 'bitcoin_addresses'
+FIELD_ADDRESS = 'address'
 
 class UserAccount(JID):
     '''Represents a user that's registered on the gateway.'''
@@ -59,6 +61,14 @@ class UserAccount(JID):
         '''Return the user's current balance'''
         #XXX: This is wrong. The user's balance is only a fraction of the whole wallet's.
         return self.bitcoin.getbalance()
+
+    def createAddress(self, label=''):
+        '''Create a new bitcoin address, associate it with the user, and return it'''
+        address = self.bitcoin.getnewaddress(label)
+        req = "insert into %s (%s, %s) values (?, ?)" % (TABLE_ADDR, FIELD_ADDRESS, FIELD_JID)
+        SQL().execute(req, (address, self.jid))
+        #TODO: Check that the creation went well before returning the address
+        return address
 
 class AlreadyRegisteredError(Exception):
     '''A JID is already registered at the gateway.'''

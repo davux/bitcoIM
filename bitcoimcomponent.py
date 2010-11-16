@@ -152,7 +152,8 @@ class BitcoimComponent:
         isUpdate = False
         try:
             frm.register()
-            #TODO: Create a first address for that user and send a welcome message.
+            frm.createAddress('My first address at %s' % self.jid)
+            #TODO: Send a welcome message.
         except AlreadyRegisteredError:
             isUpdate = True # This would be stupid, since there's no registration info to update
         cnx.send(Iq(typ='result', to=frm, frm=self.jid, attrs={'id': iq.getID()}))
