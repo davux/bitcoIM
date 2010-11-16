@@ -15,7 +15,7 @@ from protocol import NS_NICK
 from xmpp.simplexml import Node
 from xmpp.browser import Browser
 
-class BitcoimComponent:
+class BitcoIMComponent:
     '''The component itself.'''
 
     def __init__(self, jid, password, server, port=5347):

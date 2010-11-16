@@ -12,16 +12,16 @@ try:
     from xmpp import client, protocol
 except ImportError:
     problem("Error: this program needs the Python XMPP library.", True)
-from bitcoimcomponent import BitcoimComponent
+from bitcoimcomponent import BitcoIMComponent
 
 try:
-    bitcoim = BitcoimComponent(info['jid'], info['password'],
+    bitcoIM = BitcoIMComponent(info['jid'], info['password'],
                                info['server'], info['port'])
 except BitcoinServerIOError:
     problem("Communication error with bitcoin client")
 except Exception, message:
     problem("Error while connecting to server: %s" % (message), True)
 try:
-    bitcoim.loop(10)
+    bitcoIM.loop(10)
 except KeyboardInterrupt:
-    bitcoim.sayGoodbye()
+    bitcoIM.sayGoodbye()
