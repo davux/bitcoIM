@@ -57,10 +57,20 @@ class UserAccount(JID):
             elif 1 != count:
                 debug("We deleted %s rows when unregistering %s. This is not normal." % (count, jid))
 
+    def getAddresses(self):
+        '''Return the set of all user's addresses'''
+        req = "select %s from %s where %s=?" % (FIELD_ADDRESS, TABLE_ADDR, FIELD_JID)
+        SQL().execute(req, (self.jid,))
+        result = SQL().fetchall()
+        return [result[i][0] for i in range(len(result))]
+
     def getBalance(self):
         '''Return the user's current balance'''
-        #XXX: This is wrong. The user's balance is only a fraction of the whole wallet's.
-        return self.bitcoin.getbalance()
+        total_received = 0
+        for address in self.getAddresses():
+            total_received += self.bitcoin.getreceivedbyaddress(address)
+        #TODO: Substract payments made by this user, when they can made them
+        return total_received
 
     def createAddress(self, label=''):
         '''Create a new bitcoin address, associate it with the user, and return it'''
