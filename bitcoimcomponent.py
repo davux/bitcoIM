@@ -74,17 +74,18 @@ class BitcoimComponent:
             return
         debug("Message received from subscriber %s" % msg.getBody())
 
+    # If any presence stanza is received from an unregistered user, don't
+    # even look at it. They should register first.
     def presenceReceived(self, cnx, prs):
         '''Presence received'''
-        typ = prs.getType()
         frm = UserAccount(prs.getFrom())
+        if not frm.isRegistered():
+            return #TODO: Send a registration-required error
         if prs.getTo().getStripped() != self.jid:
             return # TODO: handle presence requests to hosted addresses
+        typ = prs.getType()
         if typ == 'subscribe':
-            if frm.isRegistered():
-                cnx.send(Presence(typ='subscribed', frm=self.jid, to=frm))
-            else:
-                debug("Simple subscription request without prior registration. What should we do?")
+            cnx.send(Presence(typ='subscribed', frm=self.jid, to=frm))
         elif typ == 'subscribed':
             debug('We were allowed to see %s\'s presence.' % frm)
         elif typ == 'unsubscribe':
