@@ -87,7 +87,7 @@ class BitcoimComponent:
             else:
                 debug("Simple subscription request without prior registration. What should we do?")
         elif typ == 'subscribed':
-            debug('We were allowed to see %s\'s presence.')
+            debug('We were allowed to see %s\'s presence.' % frm)
         elif typ == 'unsubscribe':
             debug('Just received an "unsubscribe" presence stanza. What does that mean?')
         elif typ == 'unsubscribed':
