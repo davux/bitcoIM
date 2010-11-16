@@ -26,16 +26,13 @@ class UserAccount(JID):
     def getAllContacts():
         '''Return the list of all JIDs that are registered on the component.'''
         req = "select %s from %s" % (FIELD_JID, TABLE_REG)
-        debug('About to execute: [%s]' % req)
         SQL().execute(req)
         result = SQL().fetchall()
         return [result[i][0] for i in range(len(result))]
 
     def isRegistered(self):
         '''Return whether a given JID is already registered.'''
-        debug('We want to know whether %s is registered.' % self.jid)
         req = "select %s from %s where %s=?" % (FIELD_ID, TABLE_REG, FIELD_JID)
-        debug('About to execute: [%s]' % req)
         SQL().execute(req, (unicode(self.jid),))
         return SQL().fetchone() is not None
 
@@ -50,7 +47,6 @@ class UserAccount(JID):
         '''Remove given JID from subscribers if it exists. Raise exception otherwise.'''
         req = "delete from %s where %s=?" % (TABLE_REG, FIELD_JID)
         curs = SQL().execute(req, (self.jid,))
-        debug("Executed %s on the database." % req)
         if curs:
             count = curs.rowcount
             debug("%s rows deleted." % count)
@@ -58,8 +54,6 @@ class UserAccount(JID):
                 raise AlreadyUnregisteredError
             elif 1 != count:
                 debug("We deleted %s rows when unregistering %s. This is not normal." % (count, jid))
-        else:
-            debug("Strange. Curs is %s." % curs)
 
     def getBalance(self):
         '''Return the user's current balance'''
