@@ -5,8 +5,7 @@ import app
 from common import problem, debug
 from conf import bitcoin as bitcoin_conf
 try:
-    from useraccount import UserAccount, AlreadyRegisteredError, \
-                            BitcoinClientNotAvailableError
+    from useraccount import UserAccount, AlreadyRegisteredError
 except IOError:
         raise IOError("Connection problem with bitcoin client!")
 from xmpp.client import Component
