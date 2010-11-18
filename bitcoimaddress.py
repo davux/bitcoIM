@@ -6,6 +6,7 @@ class BitcoIMAddress(Address):
     '''A Bitcoin address, but with some xmpp-specific capabilities.'''
 
     ENCODING_SEP = '-'
+    ENCODING_BASE = 36 # Acceptable values: from 2 to 36
 
     def __init__(self, address=None):
         '''Constructor. Initialize a bitcoin address normally.
@@ -13,9 +14,9 @@ class BitcoIMAddress(Address):
         '''
         if 'JID' == address.__class__.__name__:
             address = address.getNode()
-            parts = address.partition(self.ENCODING_SEP)
+            parts = address.partition(ENCODING_SEP)
             if len(parts[2]):
-                positions = int(parts[2], 36)
+                positions = int(parts[2], ENCODING_BASE)
                 address = ''
                 for c in reversed(parts[0]):
                     if c.isalpha():
@@ -41,9 +42,9 @@ class BitcoIMAddress(Address):
                 gaps += 1
         suffix = ""
         while mask > 0:
-            digit = mask % 36
+            digit = mask % ENCODING_BASE
             suffix = "0123456789abcdefghijklmnopqrstuvwxyz"[digit] + suffix
-            mask /= 36
+            mask /= ENCODING_BASE
         if ("" != suffix):
             suffix = self.ENCODING_SEP + suffix
         return JID(node=self.address.lower() + suffix, domain=component['jid'])
