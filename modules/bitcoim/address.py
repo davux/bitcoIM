@@ -1,8 +1,8 @@
 from conf import component
-from bitcoin.address import Address
+from bitcoin.address import Address as BCAddress
 from xmpp.protocol import JID
 
-class BitcoIMAddress(Address):
+class Address(BCAddress):
     '''A Bitcoin address, but with some xmpp-specific capabilities.'''
 
     ENCODING_SEP = '-'

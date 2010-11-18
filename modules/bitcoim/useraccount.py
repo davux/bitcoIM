@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # vi: sts=4 et sw=4
 
-from bitcoimaddress import BitcoIMAddress
+from bitcoim.address import Address
 from bitcoin.controller import Controller
 from common import debug
 from conf import bitcoin as bitcoin_conf

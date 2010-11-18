@@ -2,13 +2,13 @@
 # vi: sts=4 et sw=4
 
 import app
-from bitcoimaddress import BitcoIMAddress
+from bitcoim.address import Address
 from bitcoin.address import InvalidBitcoinAddressError
 from bitcoin.controller import Controller, BitcoinServerIOError
 from common import problem, debug
 from conf import bitcoin as bitcoin_conf
 from useraccount import UserAccount, AlreadyRegisteredError
-from xmpp.client import Component
+from xmpp.client import Component as XMPPComponent
 from xmpp.protocol import JID, Iq, Presence, Error, NodeProcessed, \
                           NS_IQ, NS_MESSAGE, NS_PRESENCE, NS_DISCO_INFO, \
                           NS_DISCO_ITEMS, NS_REGISTER, NS_VERSION
@@ -16,7 +16,7 @@ from protocol import NS_NICK
 from xmpp.simplexml import Node
 from xmpp.browser import Browser
 
-class BitcoIMComponent:
+class Component:
     '''The component itself.'''
 
     def __init__(self, jid, password, server, port=5347):
@@ -26,7 +26,7 @@ class BitcoIMComponent:
         '''
         self.bye = False
         Controller(bitcoin_conf['user'], bitcoin_conf['password']).getinfo() # This will raise an exception if there's a connection problem
-        self.cnx = Component(jid, port, debug=['socket'])
+        self.cnx = XMPPComponent(jid, port, debug=['socket'])
         self.jid = jid
         if not self.cnx.connect([server, port]):
             raise Exception('Unable to connect to %s:%s' % (server, port))
