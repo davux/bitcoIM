@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # vi: sts=4 et sw=4
 
-import app
 from bitcoim.address import Address
 from bitcoin.address import InvalidBitcoinAddressError
 from bitcoin.controller import Controller, BitcoinServerIOError
@@ -15,6 +14,11 @@ from xmpp.protocol import JID, Iq, Presence, Error, NodeProcessed, \
 from protocol import NS_NICK
 from xmpp.simplexml import Node
 from xmpp.browser import Browser
+
+APP_NAME = 'BitcoIM'
+APP_IDENTIFIER = 'bitcoim'
+APP_VERSION = '0.1'
+APP_DESCRIPTION = 'Bitcoin payment orders via XMPP'
 
 class Component:
     '''The component itself.'''
@@ -46,9 +50,9 @@ class Component:
         browser = Browser()
         browser.PlugIn(cnx)
         ids = [{'category': 'gateway', 'type': 'bitcoin',
-               'name':app.description}]
+               'name':APP_DESCRIPTION}]
         info = {'ids': ids, 'features': [NS_DISCO_INFO, NS_DISCO_ITEMS, NS_REGISTER, NS_VERSION]}
-        items = [{'jid': self.jid, 'name': app.description}]
+        items = [{'jid': self.jid, 'name': APP_DESCRIPTION}]
         browser.setDiscoHandler({'items': items, 'info': info})
 
     def loop(self, timeout=0):
@@ -165,9 +169,9 @@ class Component:
                 debug("Unknown IQ with ns '%s' and type '%s'." % (ns, typ))
         elif (NS_VERSION == ns) and ('get' == typ):
             name = Node('name')
-            name.setData(app.name)
+            name.setData(APP_NAME)
             version = Node('version')
-            version.setData(app.version)
+            version.setData(APP_VERSION)
             reply = iq.buildReply('result')
             query = reply.getTag('query')
             query.addChild(node=name)
