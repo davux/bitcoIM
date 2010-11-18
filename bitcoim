@@ -4,8 +4,10 @@
 
 import sys
 sys.path = ['./modules/'] + sys.path
+from bitcoim.sql import SQL
 from bitcoin.controller import BitcoinServerIOError
 from common import problem, debug
+from conf import db
 try:
     from conf import component as info
 except ImportError:
@@ -16,6 +18,7 @@ except ImportError:
     problem("Error: this program needs the Python XMPP library.", True)
 from bitcoim.component import Component
 
+cur = SQL(url=db['file'])
 try:
     bitcoIM = Component(info['jid'], info['password'], info['server'], info['port'])
 except BitcoinServerIOError:
