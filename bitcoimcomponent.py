@@ -73,7 +73,7 @@ class BitcoIMComponent:
 
     def addAddressToRoster(self, cnx, address, user):
         msg = 'Hi! I\'m your new Bitcoin address'
-        label = address.getLabel()
+        label = address.label
         if 0 != len(label):
             msg += ' (%s)' % label
         pres = Presence(typ='subscribe', status=msg, frm=address.asJID(), to=user)

@@ -73,8 +73,7 @@ class UserAccount(JID):
     def createAddress(self, label=None):
         '''Create a new bitcoin address, associate it with the user, and return it'''
         address = BitcoIMAddress()
-        if label is not None:
-            address.setLabel(label)
+        address.label = label
         req = "insert into %s (%s, %s) values (?, ?)" % (TABLE_ADDR, FIELD_ADDRESS, FIELD_JID)
         SQL().execute(req, (str(address), self.jid))
         #TODO: Check that the creation went well before returning the address
