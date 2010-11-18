@@ -3,9 +3,26 @@ from bitcoin.address import Address
 from xmpp.protocol import JID
 
 class BitcoIMAddress(Address):
-    '''A Bitoin address, but with some boosted capacities.'''
+    '''A Bitcoin address, but with some xmpp-specific capabilities.'''
+
+    ENCODING_SEP = '-'
 
     def __init__(self, address=None):
+        '''Constructor. Initialize a bitcoin address normally.
+           If the argument is a JID object, though, decode it first.
+        '''
+        if 'JID' == address.__class__.__name__:
+            address = address.getNode()
+            parts = address.partition(self.ENCODING_SEP)
+            if len(parts[2]):
+                positions = int(parts[2], 36)
+                address = ''
+                for c in reversed(parts[0]):
+                    if c.isalpha():
+                        if (positions % 2):
+                            c = c.upper()
+                        positions //= 2
+                    address = c + address
         Address.__init__(self, address)
 
     def asJID(self):
@@ -28,6 +45,6 @@ class BitcoIMAddress(Address):
             suffix = "0123456789abcdefghijklmnopqrstuvwxyz"[digit] + suffix
             mask /= 36
         if ("" != suffix):
-            suffix = '-' + suffix
+            suffix = self.ENCODING_SEP + suffix
         return JID(node=self.address.lower() + suffix, domain=component['jid'])
 
