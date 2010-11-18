@@ -42,9 +42,8 @@ class BitcoIMAddress(Address):
                 gaps += 1
         suffix = ""
         while mask > 0:
-            digit = mask % ENCODING_BASE
-            suffix = "0123456789abcdefghijklmnopqrstuvwxyz"[digit] + suffix
-            mask /= ENCODING_BASE
+            suffix = "0123456789abcdefghijklmnopqrstuvwxyz"[mask % ENCODING_BASE] + suffix
+            mask //= ENCODING_BASE
         if ("" != suffix):
             suffix = self.ENCODING_SEP + suffix
         return JID(node=self.address.lower() + suffix, domain=component['jid'])
