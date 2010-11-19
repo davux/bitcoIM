@@ -121,8 +121,9 @@ class Component:
                 debug('Presence error. Just ignore it?')
         else:
             try:
-                address = BitcoIMAddress(JID(prs.getTo()).getNode())
+                address = Address(JID(prs.getTo()))
             except InvalidBitcoinAddressError:
+                debug("Invalid address %s" % prs.getTo())
                 raise NodeProcessed # Just drop the case. TODO: Handle invalid addresses better
             if not frm.ownsAddress(address):
                 raise NodeProcessed # Just drop the case. TODO: Reply an error ("not-authorized" or something)

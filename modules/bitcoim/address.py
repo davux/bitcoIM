@@ -24,7 +24,7 @@ class Address(BCAddress):
                             c = c.upper()
                         positions //= 2
                     address = c + address
-        Address.__init__(self, address)
+        BCAddress.__init__(self, address)
 
     def asJID(self):
         '''
