@@ -6,8 +6,3 @@ to connect as a component to the Jabber server.
 The 'db' section is used to set up the file name of the SQLite
 database that the program stores its persistent data in (registrations,
 bitcoin addresses, users' balances, etc.).
-
-You need to create the database using the file 'db_structure.sql'.
-For example, is the file name of the database is bitcoim.db, simply
-run from the command line:
-$ sqlite3 < db_structure.sql bitcoim.db
