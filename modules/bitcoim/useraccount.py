@@ -15,21 +15,30 @@ TABLE_ADDR = 'bitcoin_addresses'
 FIELD_ADDRESS = 'address'
 
 class UserAccount(object):
-    '''Represents a user that's registered on the gateway.'''
+    '''Represents a user that's registered on the gateway.
+       This class has a unique field: jid, which is the string
+       representation of the user's bare JID.
+    '''
 
     cache = {}
 
     def __new__(cls, jid=None):
         if jid is None:
             return None
+        jid = jid.getStripped()
         if jid not in cls.cache:
+            debug("Creating new UserAccount in cache for %s" % jid)
             cls.cache[jid] = object.__new__(cls)
+        debug("Returning UserAccount(%s)" % jid)
         return cls.cache[jid]
 
     def __init__(self, jid=None):
-        '''Constructor. Initializes an account based on their JID.'''
+        '''Constructor. Initialize an account based on their JID.
+           The jid variable must be of type JID. The resource is
+           ignored, only the bare JID is taken into account.'''
         object.__init__(self)
-        self.jid = jid
+        self.jid = jid.getStripped()
+        debug("Instanciated UserAccount(%s)" % self.jid)
 
     @staticmethod
     def getAllContacts():

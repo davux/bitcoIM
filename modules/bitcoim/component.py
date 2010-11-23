@@ -97,26 +97,26 @@ class Component:
     # even look at it. They should register first.
     def presenceReceived(self, cnx, prs):
         '''Presence received'''
-        frm = UserAccount(prs.getFrom())
+        user = UserAccount(prs.getFrom())
         to = prs.getTo().getStripped()
-        if not frm.isRegistered():
+        if not user.isRegistered():
             return #TODO: Send a registration-required error
         typ = prs.getType()
         if to == self.jid:
             if typ == 'subscribe':
-                cnx.send(Presence(typ='subscribed', frm=to, to=frm))
+                cnx.send(Presence(typ='subscribed', frm=to, to=user.jid))
             elif typ == 'subscribed':
-                debug('We were allowed to see %s\'s presence.' % frm)
+                debug('We were allowed to see %s\'s presence.' % user)
             elif typ == 'unsubscribe':
                 debug('Just received an "unsubscribe" presence stanza. What does that mean?')
             elif typ == 'unsubscribed':
                 debug('Unsubscribed. Any interest in this information?')
             elif typ == 'probe':
-                self.sendBitcoinPresence(cnx, frm)
+                self.sendBitcoinPresence(cnx, user)
             elif (typ == 'available') or (typ is None):
-                self.sendBitcoinPresence(cnx, frm)
+                self.sendBitcoinPresence(cnx, user)
             elif typ == 'unavailable':
-                cnx.send(Presence(typ='unavailable', frm=to, to=frm))
+                cnx.send(Presence(typ='unavailable', frm=to, to=user.jid))
             elif typ == 'error':
                 debug('Presence error. Just ignore it?')
         else:
@@ -125,18 +125,18 @@ class Component:
             except InvalidBitcoinAddressError:
                 debug("Invalid address %s" % prs.getTo())
                 raise NodeProcessed # Just drop the case. TODO: Handle invalid addresses better
-            if not frm.ownsAddress(address):
+            if not user.ownsAddress(address):
                 raise NodeProcessed # Just drop the case. TODO: Reply an error ("not-authorized" or something)
             if typ == 'subscribe':
-                cnx.send(Presence(typ='subscribed', frm=to, to=frm))
+                cnx.send(Presence(typ='subscribed', frm=to, to=user.jid))
             elif typ == 'unsubscribe':
-                debug('%s doesn\'t want to see address %s anymore. We should really honor that.') #TODO: Implement hiding of addresses
+                debug('%s doesn\'t want to see address %s anymore. We should really honor that.' % user) #TODO: Implement hiding of addresses
             elif typ == 'probe':
-                self.sendBitcoinPresence(cnx, frm, address)
+                self.sendBitcoinPresence(cnx, user, address)
             elif (typ == 'available') or (typ is None):
-                self.sendBitcoinPresence(cnx, frm, address) # Funny way to show/hide addresses: send them directed presence
+                self.sendBitcoinPresence(cnx, user, address) # Funny way to show/hide addresses: send them directed presence
             elif typ == 'unavailable':
-                cnx.send(Presence(typ='unavailable', frm=to, to=frm)) # Funny way to show/hide addresses: send them directed presence
+                cnx.send(Presence(typ='unavailable', frm=to, to=user.jid)) # Funny way to show/hide addresses: send them directed presence
         raise NodeProcessed
 
     def iqReceived(self, cnx, iq):
@@ -184,13 +184,14 @@ class Component:
 
     def registrationRequested(self, cnx, iq):
         '''A registration request was received'''
-        frm = UserAccount(iq.getFrom())
+        frm = iq.getFrom()
         debug("Registration request from %s" % frm)
         isUpdate = False
+        user = UserAccount(frm)
         try:
-            frm.register()
-            new_address = frm.createAddress('My first address at %s' % self.jid)
-            self.addAddressToRoster(cnx, new_address, frm)
+            user.register()
+            new_address = user.createAddress('My first address at %s' % self.jid)
+            self.addAddressToRoster(cnx, new_address, user)
         except AlreadyRegisteredError:
             isUpdate = True # This would be stupid, since there's no registration info to update
         cnx.send(Iq(typ='result', to=frm, frm=self.jid, attrs={'id': iq.getID()}))
@@ -199,13 +200,13 @@ class Component:
 
     def unregistrationRequested(self, cnx, iq):
         '''An unregistration request was received'''
-        frm = UserAccount(iq.getFrom())
+        user = UserAccount(iq.getFrom())
         try:
-            frm.unregister()
+            user.unregister()
             #TODO: Destroy all information about that user's addresses
         except AlreadyUnregisteredError:
             pass # We don't really mind about unknown people wanting to unregister. Should we?
         cnx.send(iq.buildReply('result'))
-        cnx.send(Presence(to=frm, frm=self.jid, typ='unsubscribe'))
-        cnx.send(Presence(to=frm, frm=self.jid, typ='unsubscribed'))
-        cnx.send(Presence(to=frm, frm=self.jid, typ='unavailable', status='Thanks for using this service. Bye!'))
+        cnx.send(Presence(to=user.jid, frm=self.jid, typ='unsubscribe'))
+        cnx.send(Presence(to=user.jid, frm=self.jid, typ='unsubscribed'))
+        cnx.send(Presence(to=user.jid, frm=self.jid, typ='unavailable', status='Thanks for using this service. Bye!'))
