@@ -31,6 +31,7 @@ class UserAccount(object):
             debug("Creating new UserAccount in cache for %s" % jid)
             cls.cache[jid] = object.__new__(cls)
             cls.cache[jid].jid = jid
+            cls.cache[jid].resources = set()
         debug("Returning UserAccount(%s)" % jid)
         return cls.cache[jid]
 
@@ -70,6 +71,12 @@ class UserAccount(object):
                 raise AlreadyUnregisteredError
             elif 1 != count:
                 debug("We deleted %s rows when unregistering %s. This is not normal." % (count, jid))
+
+    def resourceConnects(self, resource):
+        self.resources.add(resource)
+
+    def resourceDisconnects(self, resource):
+        self.resources.remove(resource)
 
     def getAddresses(self):
         '''Return the set of all user's addresses'''
