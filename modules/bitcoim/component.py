@@ -186,11 +186,13 @@ class Component:
             debug("Unhandled IQ namespace '%s'." % ns)
 
     def userResourceConnects(self, user, resource):
-        self.connectedUsers.add(user)
         user.resourceConnects(resource)
-        #TODO: Handle more precisely the moment when it's fine
-        #      to send presence from the gw, from addresses.
-        self.sendBitcoinPresence(self.cnx, user)
+        if not user in self.connectedUsers:
+            self.sendBitcoinPresence(self.cnx, user)
+            for address in user.getAddresses():
+                #TODO: More useful information (number/percentage of payments received?)
+                self.cnx.send(Presence(to=user.jid, typ='available', show='online', frm=Address(address).asJID()))
+            self.connectedUsers.add(user)
 
     def userResourceDisconnects(self, user, resource):
         user.resourceDisconnects(resource)
