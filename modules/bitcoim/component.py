@@ -32,6 +32,7 @@ class Component:
         Controller(bitcoin_conf['user'], bitcoin_conf['password']).getinfo() # This will raise an exception if there's a connection problem
         self.cnx = XMPPComponent(jid, port, debug=['socket'])
         self.jid = jid
+        self.connectedUsers = set()
         if not self.cnx.connect([server, port]):
             raise Exception('Unable to connect to %s:%s' % (server, port))
         if not self.cnx.auth(jid, password):
@@ -116,12 +117,9 @@ class Component:
             elif typ == 'probe':
                 self.sendBitcoinPresence(cnx, user)
             elif (typ == 'available') or (typ is None):
-                user.resourceConnects(resource)
-                self.sendBitcoinPresence(cnx, user)
+                self.userResourceConnects(user, resource)
             elif typ == 'unavailable':
-                user.resourceDisconnects(resource)
-                if 0 == len(user.resources):
-                    cnx.send(Presence(typ='unavailable', frm=to, to=user.jid))
+                self.userResourceDisconnects(user, resource)
             elif typ == 'error':
                 debug('Presence error. Just ignore it?')
         else:
@@ -186,6 +184,20 @@ class Component:
             raise NodeProcessed
         else:
             debug("Unhandled IQ namespace '%s'." % ns)
+
+    def userResourceConnects(self, user, resource):
+        self.connectedUsers.add(user)
+        user.resourceConnects(resource)
+        #TODO: Handle more precisely the moment when it's fine
+        #      to send presence from the gw, from addresses.
+        self.sendBitcoinPresence(self.cnx, user)
+
+    def userResourceDisconnects(self, user, resource):
+        user.resourceDisconnects(resource)
+        if (user in self.connectedUsers) and (0 == len(user.resources)):
+            #TODO: Send unavailable presence from bc addressses too
+            self.cnx.send(Presence(typ='unavailable', frm=self.jid, to=user.jid))
+            self.connectedUsers.remove(user)
 
     def registrationRequested(self, cnx, iq):
         '''A registration request was received'''
