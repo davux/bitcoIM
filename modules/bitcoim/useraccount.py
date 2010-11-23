@@ -40,6 +40,10 @@ class UserAccount(object):
         self.jid = jid.getStripped()
         debug("Instanciated UserAccount(%s)" % self.jid)
 
+    def __str__(self):
+        '''The textual representation of a UserAccount is the bare JID.'''
+        return self.jid
+
     @staticmethod
     def getAllContacts():
         '''Return the list of all JIDs that are registered on the component.'''
