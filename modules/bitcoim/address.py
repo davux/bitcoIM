@@ -2,11 +2,11 @@ from conf import component
 from bitcoin.address import Address as BCAddress
 from xmpp.protocol import JID
 
+ENCODING_SEP = '-'
+ENCODING_BASE = 36 # Any value from 2 to 36 would work - smaller values produce longer suffixes
+
 class Address(BCAddress):
     '''A Bitcoin address, but with some xmpp-specific capabilities.'''
-
-    ENCODING_SEP = '-'
-    ENCODING_BASE = 36 # Acceptable values: from 2 to 36
 
     def __init__(self, address=None):
         '''Constructor. Initialize a bitcoin address normally.
@@ -45,6 +45,6 @@ class Address(BCAddress):
             suffix = "0123456789abcdefghijklmnopqrstuvwxyz"[mask % ENCODING_BASE] + suffix
             mask //= ENCODING_BASE
         if ("" != suffix):
-            suffix = self.ENCODING_SEP + suffix
+            suffix = ENCODING_SEP + suffix
         return JID(node=self.address.lower() + suffix, domain=component['jid'])
 
