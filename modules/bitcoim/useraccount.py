@@ -22,9 +22,7 @@ class UserAccount(object):
 
     cache = {}
 
-    def __new__(cls, jid=None):
-        if jid is None:
-            return None
+    def __new__(cls, jid):
         jid = jid.getStripped()
         if jid not in cls.cache:
             debug("Creating new UserAccount in cache for %s" % jid)
@@ -32,7 +30,7 @@ class UserAccount(object):
         debug("Returning UserAccount(%s)" % jid)
         return cls.cache[jid]
 
-    def __init__(self, jid=None):
+    def __init__(self, jid):
         '''Constructor. Initialize an account based on their JID.
            The jid variable must be of type JID. The resource is
            ignored, only the bare JID is taken into account.'''
