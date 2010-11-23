@@ -76,7 +76,10 @@ class UserAccount(object):
         self.resources.add(resource)
 
     def resourceDisconnects(self, resource):
-        self.resources.remove(resource)
+        try:
+            self.resources.remove(resource)
+        except KeyError:
+            pass # An "unavailable" presence is sent twice. Ignore.
 
     def getAddresses(self):
         '''Return the set of all user's addresses'''
