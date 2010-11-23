@@ -97,7 +97,9 @@ class Component:
     # even look at it. They should register first.
     def presenceReceived(self, cnx, prs):
         '''Presence received'''
-        user = UserAccount(prs.getFrom())
+        frm = prs.getFrom()
+        resource = frm.getResource()
+        user = UserAccount(frm)
         to = prs.getTo().getStripped()
         if not user.isRegistered():
             return #TODO: Send a registration-required error
@@ -114,9 +116,12 @@ class Component:
             elif typ == 'probe':
                 self.sendBitcoinPresence(cnx, user)
             elif (typ == 'available') or (typ is None):
+                user.resourceConnects(resource)
                 self.sendBitcoinPresence(cnx, user)
             elif typ == 'unavailable':
-                cnx.send(Presence(typ='unavailable', frm=to, to=user.jid))
+                user.resourceDisconnects(resource)
+                if 0 == len(user.resources):
+                    cnx.send(Presence(typ='unavailable', frm=to, to=user.jid))
             elif typ == 'error':
                 debug('Presence error. Just ignore it?')
         else:
