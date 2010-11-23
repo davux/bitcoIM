@@ -63,8 +63,8 @@ class Component:
 
     def sayGoodbye(self):
         '''Ending method. Doesn't do anything interesting yet.'''
-        for jid in UserAccount.getAllContacts():
-            self.cnx.send(Presence(to=jid, frm=self.jid, typ='unavailable',
+        for user in self.connectedUsers:
+            self.cnx.send(Presence(to=user.jid, frm=self.jid, typ='unavailable',
                           status='Service is shutting down. See you later.'))
         debug("Bye.")
 
