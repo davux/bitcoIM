@@ -14,13 +14,13 @@ TABLE_REG = 'registrations'
 TABLE_ADDR = 'bitcoin_addresses'
 FIELD_ADDRESS = 'address'
 
-class UserAccount(JID):
+class UserAccount(object):
     '''Represents a user that's registered on the gateway.'''
 
-    def __init__(self, jid=None, node='', domain='', resource=''):
+    def __init__(self, jid=None):
         '''Constructor. Initializes an account based on their JID.'''
-        JID.__init__(self, jid, node, domain, resource)
-        self.jid = self.__str__(0)
+        object.__init__(self)
+        self.jid = jid
 
     @staticmethod
     def getAllContacts():
