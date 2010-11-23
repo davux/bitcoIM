@@ -17,6 +17,15 @@ FIELD_ADDRESS = 'address'
 class UserAccount(object):
     '''Represents a user that's registered on the gateway.'''
 
+    cache = {}
+
+    def __new__(cls, jid=None):
+        if jid is None:
+            return None
+        if jid not in cls.cache:
+            cls.cache[jid] = object.__new__(cls)
+        return cls.cache[jid]
+
     def __init__(self, jid=None):
         '''Constructor. Initializes an account based on their JID.'''
         object.__init__(self)
