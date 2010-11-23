@@ -71,7 +71,7 @@ class Component:
         if not user.isRegistered():
             return
         #TODO: If address exists, don't show any status message, and change the "from"
-        prs = Presence(to=user, typ='available', show='online', frm=self.jid,
+        prs = Presence(to=user.jid, typ='available', show='online', frm=self.jid,
                        status='Current balance: %s' % user.getBalance())
         cnx.send(prs)
 
@@ -80,7 +80,7 @@ class Component:
         label = address.label
         if 0 != len(label):
             msg += ' (%s)' % label
-        pres = Presence(typ='subscribe', status=msg, frm=address.asJID(), to=user)
+        pres = Presence(typ='subscribe', status=msg, frm=address.asJID(), to=user.jid)
         nick = Node('nick')
         nick.setNamespace(NS_NICK)
         nick.setData(label)
