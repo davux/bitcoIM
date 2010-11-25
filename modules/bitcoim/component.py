@@ -186,6 +186,10 @@ class Component:
             debug("Unhandled IQ namespace '%s'." % ns)
 
     def userResourceConnects(self, user, resource):
+        '''Called when the component receives a presence"available" from a
+           user. This method first registers the resource. Then, if it's the
+           user's first online resource: sends them a presence packet, and
+           internally adds them to the list of online users.'''
         user.resourceConnects(resource)
         if not user in self.connectedUsers:
             self.sendBitcoinPresence(self.cnx, user)
@@ -195,6 +199,10 @@ class Component:
             self.connectedUsers.add(user)
 
     def userResourceDisconnects(self, user, resource):
+        '''Called when the component receives a presence "unavailable" from
+           a user. This method first unregisters the resource. Then, if the
+           user has no more online resource, sends them an "unavailable" presence,
+           and internally removes them from the list of online users.'''
         user.resourceDisconnects(resource)
         if (user in self.connectedUsers) and (0 == len(user.resources)):
             #TODO: Send unavailable presence from bc addressses too
