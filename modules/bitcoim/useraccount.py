@@ -106,8 +106,9 @@ class UserAccount(object):
         return address
 
     def ownsAddress(self, address):
-        address = str(address)
-        return True #TODO: Check whether the user really owns this address
+        req = "select %s from %s where %s=? and %s=?" % (FIELD_ID, TABLE_ADDR, FIELD_ADDR, FIELD_JID)
+        SQL().execute(req, (str(address), self.jid))
+        return SQL().fetchone() is not None
 
 class AlreadyRegisteredError(Exception):
     '''A JID is already registered at the gateway.'''
