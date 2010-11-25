@@ -71,6 +71,8 @@ class UserAccount(object):
                 raise AlreadyUnregisteredError
             elif 1 != count:
                 debug("We deleted %s rows when unregistering %s. This is not normal." % (count, jid))
+            req = "delete from %s where %s=?" % (TABLE_ADDR, FIELD_JID)
+            SQL().execute(req, (self.jid,))
 
     def resourceConnects(self, resource):
         self.resources.add(resource)

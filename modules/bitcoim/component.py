@@ -230,7 +230,6 @@ class Component:
         user = UserAccount(iq.getFrom())
         try:
             user.unregister()
-            #TODO: Destroy all information about that user's addresses
         except AlreadyUnregisteredError:
             pass # We don't really mind about unknown people wanting to unregister. Should we?
         cnx.send(iq.buildReply('result'))
