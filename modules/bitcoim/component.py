@@ -149,10 +149,6 @@ class Component:
                 debug('%s doesn\'t want to see address %s anymore. We should really honor that.' % user) #TODO: Implement hiding of addresses
             elif typ == 'probe':
                 self.sendBitcoinPresence(cnx, user, address)
-            elif (typ == 'available') or (typ is None):
-                self.sendBitcoinPresence(cnx, user, address) # Funny way to show/hide addresses: send them directed presence
-            elif typ == 'unavailable':
-                cnx.send(Presence(typ='unavailable', frm=to, to=user.jid)) # Funny way to show/hide addresses: send them directed presence
         raise NodeProcessed
 
     def iqReceived(self, cnx, iq):
@@ -205,9 +201,6 @@ class Component:
            internally adds them to the list of online users.'''
         user.resourceConnects(resource)
         if not user in self.connectedUsers:
-            self.sendBitcoinPresence(self.cnx, user)
-            for address in user.getRoster():
-                self.sendBitcoinPresence(self.cnx, user, Address(address))
             self.connectedUsers.add(user)
 
     def userResourceDisconnects(self, user, resource):
