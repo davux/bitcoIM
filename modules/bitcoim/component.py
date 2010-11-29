@@ -10,7 +10,7 @@ from useraccount import UserAccount, AlreadyRegisteredError
 from xmpp.client import Component as XMPPComponent
 from xmpp.protocol import JID, Iq, Presence, Error, NodeProcessed, \
                           NS_IQ, NS_MESSAGE, NS_PRESENCE, NS_DISCO_INFO, \
-                          NS_DISCO_ITEMS, NS_REGISTER, NS_VERSION
+                          NS_DISCO_ITEMS, NS_GATEWAY, NS_REGISTER, NS_VERSION
 from protocol import NS_NICK
 from xmpp.simplexml import Node
 from xmpp.browser import Browser
@@ -59,7 +59,7 @@ class Component:
         browser.PlugIn(cnx)
         ids = [{'category': 'gateway', 'type': 'bitcoin',
                'name':APP_DESCRIPTION}]
-        info = {'ids': ids, 'features': [NS_DISCO_INFO, NS_DISCO_ITEMS, NS_REGISTER, NS_VERSION]}
+        info = {'ids': ids, 'features': [NS_DISCO_INFO, NS_DISCO_ITEMS, NS_REGISTER, NS_VERSION, NS_GATEWAY]}
         items = [{'jid': self.jid, 'name': APP_DESCRIPTION}]
         browser.setDiscoHandler({'items': items, 'info': info})
 
@@ -191,6 +191,33 @@ class Component:
             query.addChild(node=version)
             cnx.send(reply)
             raise NodeProcessed
+        elif NS_GATEWAY == ns:
+                if 'get' == typ:
+                    desc = Node('desc')
+                    desc.setData('Please enter the Bitcoin address you would like to add.')
+                    prompt = Node('prompt')
+                    prompt.setData('Bitcoin address')
+                    reply = iq.buildReply('result')
+                    query = reply.getTag('query')
+                    query.addChild(node=desc)
+                    query.addChild(node=prompt)
+                    cnx.send(reply)
+                    raise NodeProcessed
+                elif 'set' == typ:
+                    children = iq.getQueryChildren()
+                    if (0 != len(children)) and ('prompt' == children[0].getName()):
+                        prompt = children[0].getData()
+                        try:
+                            jid = Node('jid')
+                            jid.setData(Address(prompt).asJID())
+                            reply = iq.buildReply('result')
+                            query = reply.getTag('query')
+                            query.addChild(node=jid)
+                        except InvalidBitcoinAddressError:
+                            reply = iq.buildReply('error')
+                            debug("TODO: Send an error because the address %s is invalid." % prompt)
+                        cnx.send(reply)
+                        raise NodeProcessed
         else:
             debug("Unhandled IQ namespace '%s'." % ns)
 
