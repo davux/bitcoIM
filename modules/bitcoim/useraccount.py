@@ -84,11 +84,23 @@ class UserAccount(object):
             pass # An "unavailable" presence is sent twice. Ignore.
 
     def getAddresses(self):
-        '''Return the set of all user's addresses'''
+        '''Return the set of all addresses the user has control over'''
         req = "select %s from %s where %s=?" % (FIELD_ADDRESS, TABLE_ADDR, FIELD_JID)
         SQL().execute(req, (self.jid,))
         result = SQL().fetchall()
         return [result[i][0] for i in range(len(result))]
+
+    def getRoster(self):
+        '''Return the set of all the addresses the user has in her/his roster.
+           This is different from the addresses the user has control over:
+             - the user might want to ignore one of their own addresses,
+               because there's no need to see them.
+             - the user might want to see some addresses s/he doesn't own, in
+               order to be able to easily send bitcoins to them.
+        '''
+        #TODO: Make it an independant list. As a placeholder, it's currently
+        #      equivalent to getAddresses().
+        return self.getAddresses()
 
     def getBalance(self):
         '''Return the user's current balance'''

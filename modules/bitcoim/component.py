@@ -27,6 +27,9 @@ class Component:
         '''Constructor.
            - Establish a session
            - Declare handlers
+           - Send initial presence probe to all users
+           - Send initial presence broadcasts to all users, from the gateway
+             and from each of their "contacts" (bitcoin addresses)
         '''
         self.bye = False
         Controller(bitcoin_conf['user'], bitcoin_conf['password']).getinfo() # This will raise an exception if there's a connection problem
@@ -43,6 +46,10 @@ class Component:
         self.handleDisco(self.cnx)
         for jid in UserAccount.getAllContacts():
             self.cnx.send(Presence(to=jid, frm=self.jid, typ='probe'))
+            user = UserAccount(JID(jid))
+            self.sendBitcoinPresence(self.cnx.user)
+            for addr in user.getRoster():
+                self.sendBitcoinPresence(self.cnx, user, addr)
 
     def handleDisco(self, cnx):
         '''Define the Service Discovery information for automatic handling
@@ -69,6 +76,9 @@ class Component:
         debug("Bye.")
 
     def sendBitcoinPresence(self, cnx, user, address=None):
+        '''Send a presence information to the user, from a specific address.
+           If address is None, send information from the gateway itself.
+        '''
         if not user.isRegistered():
             return
         #TODO: If address exists, don't show any status message, and change the "from"
@@ -193,7 +203,7 @@ class Component:
         user.resourceConnects(resource)
         if not user in self.connectedUsers:
             self.sendBitcoinPresence(self.cnx, user)
-            for address in user.getAddresses():
+            for address in user.getRoster():
                 #TODO: More useful information (number/percentage of payments received?)
                 self.cnx.send(Presence(to=user.jid, typ='available', show='online', frm=Address(address).asJID()))
             self.connectedUsers.add(user)
