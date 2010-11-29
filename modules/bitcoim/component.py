@@ -47,9 +47,9 @@ class Component:
         for jid in UserAccount.getAllContacts():
             self.cnx.send(Presence(to=jid, frm=self.jid, typ='probe'))
             user = UserAccount(JID(jid))
-            self.sendBitcoinPresence(self.cnx.user)
+            self.sendBitcoinPresence(self.cnx, user)
             for addr in user.getRoster():
-                self.sendBitcoinPresence(self.cnx, user, addr)
+                self.sendBitcoinPresence(self.cnx, user, Address(addr))
 
     def handleDisco(self, cnx):
         '''Define the Service Discovery information for automatic handling
@@ -81,9 +81,12 @@ class Component:
         '''
         if not user.isRegistered():
             return
-        #TODO: If address exists, don't show any status message, and change the "from"
-        prs = Presence(to=user.jid, typ='available', show='online', frm=self.jid,
-                       status='Current balance: %s' % user.getBalance())
+        if address is None:
+            prs = Presence(to=user.jid, typ='available', show='online', frm=self.jid,
+                           status='Current balance: %s' % user.getBalance())
+        else:
+            #TODO: More useful information (number/percentage of payments received?)
+            prs = Presence(to=user.jid, typ='available', show='online', frm=address.asJID())
         cnx.send(prs)
 
     def addAddressToRoster(self, cnx, address, user):
@@ -204,8 +207,7 @@ class Component:
         if not user in self.connectedUsers:
             self.sendBitcoinPresence(self.cnx, user)
             for address in user.getRoster():
-                #TODO: More useful information (number/percentage of payments received?)
-                self.cnx.send(Presence(to=user.jid, typ='available', show='online', frm=Address(address).asJID()))
+                self.sendBitcoinPresence(self.cnx, user, Address(address))
             self.connectedUsers.add(user)
 
     def userResourceDisconnects(self, user, resource):
