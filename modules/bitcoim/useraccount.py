@@ -108,7 +108,7 @@ class UserAccount(object):
         return address
 
     def ownsAddress(self, address):
-        req = "select %s from %s where %s=? and %s=?" % (FIELD_ID, TABLE_ADDR, FIELD_ADDR, FIELD_JID)
+        req = "select %s from %s where %s=? and %s=?" % (FIELD_ID, TABLE_ADDR, FIELD_ADDRESS, FIELD_JID)
         SQL().execute(req, (str(address), self.jid))
         return SQL().fetchone() is not None
 
