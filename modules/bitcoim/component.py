@@ -134,7 +134,7 @@ class Component:
             elif typ == 'unavailable':
                 self.userResourceDisconnects(user, resource)
             elif typ == 'error':
-                debug('Presence error. Just ignore it?')
+                debug('Presence error. TODO: Handle it by not sending presence updates to them until they send a non-error.')
         else:
             try:
                 address = Address(JID(prs.getTo()))
