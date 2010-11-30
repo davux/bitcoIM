@@ -1,5 +1,6 @@
 from conf import component
 from bitcoin.address import Address as BCAddress
+from paymentorder import PaymentOrder
 from xmpp.protocol import JID
 
 ENCODING_SEP = '-'
@@ -68,3 +69,36 @@ class Address(BCAddress):
         else:
             total = user.getTotalReceived()
         return self.getReceived() * 100 / total
+
+    def command(self, userJID, cmd):
+        '''Interpret a command sent as a message. Return a line to show to the user.
+           NOTE: This function might not stay here.'''
+        words = cmd.split(None, 2)
+        if 0 == len(words):
+            return None
+        if 'pay' == words[0]:
+            try:
+                amount = int(words[1])
+            except IndexError:
+                raise CommandSyntaxError, 'You must specify an amount.'
+            except ValueError:
+                raise CommandSyntaxError, 'The amount must be a number.'
+            if amount <= 0:
+                raise CommandSyntaxError, 'The amount must be positive.'
+            try:
+                comment = words[2]
+            except IndexError:
+                comment = ''
+            order = PaymentOrder(userJID, self.address, amount, comment)
+            order.queue()
+            reply = "You want to pay BTC %s to address %s" % (amount, order.address)
+            if 0 != len(comment):
+                reply += ' (%s)' % comment
+            reply += ". Please confirm by typing: confirm %s" % order.code
+            return reply
+        else:
+            raise CommandSyntaxError, 'Unknown command \'%s\'' % words[0]
+
+class CommandSyntaxError(Exception):
+    '''There was a syntax in the command.'''
+    pass
