@@ -49,7 +49,7 @@ class Component:
             user = UserAccount(JID(jid))
             self.sendBitcoinPresence(self.cnx, user)
             for addr in user.getRoster():
-                self.sendBitcoinPresence(self.cnx, user, Address(addr))
+                self.sendBitcoinPresence(self.cnx, user, Address(addr).asJID())
 
     def handleDisco(self, cnx):
         '''Define the Service Discovery information for automatic handling
@@ -77,19 +77,20 @@ class Component:
                 self.cnx.send(Presence(to=user.jid, frm=Address(addr).asJID(), typ='unavailable', status=message))
         debug("Bye.")
 
-    def sendBitcoinPresence(self, cnx, user, address=None):
+    def sendBitcoinPresence(self, cnx, user, fromJID=None):
         '''Send a presence information to the user, from a specific address.
            If address is None, send information from the gateway itself.
         '''
         if not user.isRegistered():
             return
-        if address is None:
-            prs = Presence(to=user.jid, typ='available', show='online', frm=self.jid,
-                           status='Current balance: %s' % user.getBalance())
+        if fromJID is None:
+            fromJID = self.jid
+        if fromJID == self.jid:
+            status = 'Current balance: %s' % user.getBalance()
         else:
             #TODO: More useful information (number/percentage of payments received?)
-            prs = Presence(to=user.jid, typ='available', show='online', frm=address.asJID())
-        cnx.send(prs)
+            status = None
+        cnx.send(Presence(to=user.jid, typ='available', show='online', status=status, frm=fromJID))
 
     def addAddressToRoster(self, cnx, address, user):
         msg = 'Hi! I\'m your new Bitcoin address'
@@ -150,7 +151,7 @@ class Component:
             elif typ == 'unsubscribe':
                 debug('%s doesn\'t want to see address %s anymore. We should really honor that.' % user) #TODO: Implement hiding of addresses
             elif typ == 'probe':
-                self.sendBitcoinPresence(cnx, user, address)
+                self.sendBitcoinPresence(cnx, user, Address(address).asJID())
         raise NodeProcessed
 
     def iqReceived(self, cnx, iq):
@@ -233,7 +234,7 @@ class Component:
             self.sendBitcoinPresence(self.cnx, user)
             self.connectedUsers.add(user)
             for address in user.getRoster():
-                self.sendBitcoinPresence(self.cnx, user, Address(address))
+                self.sendBitcoinPresence(self.cnx, user, Address(address).asJID())
 
     def userResourceDisconnects(self, user, resource):
         '''Called when the component receives a presence "unavailable" from
