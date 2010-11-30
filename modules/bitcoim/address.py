@@ -57,3 +57,14 @@ class Address(BCAddress):
             return row[0]
         else:
             return None
+
+    def getPercentageReceived(self):
+        '''Returns the percentage of bitcoins received on this address over the total received
+           by the same user.'''
+        from useraccount import UserAccount
+        user = UserAccount(JID(self.getOwner()))
+        if user is None: # Shouldn't happen: we normally only care about addresses with an owner
+            total = self.getReceived() # This way we always return 100%. TODO: use an exception
+        else:
+            total = user.getTotalReceived()
+        return self.getReceived() * 100 / total
