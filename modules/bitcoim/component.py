@@ -230,6 +230,7 @@ class Component:
            internally adds them to the list of online users.'''
         user.resourceConnects(resource)
         if not user in self.connectedUsers:
+            self.sendBitcoinPresence(self.cnx, user)
             self.connectedUsers.add(user)
 
     def userResourceDisconnects(self, user, resource):
