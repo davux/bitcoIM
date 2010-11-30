@@ -88,6 +88,18 @@ class Database(object):
                          PRIMARY KEY (id)
                          )'''
                 SQL(self.url).execute(req)
+                req = '''CREATE TABLE IF NOT EXISTS payments (
+                         id INTEGER NOT NULL,
+                         from_jid varchar(256) NOT NULL,
+                         date datetime NOT NULL,
+                         recipient varchar(256) NOT NULL,
+                         amount real NOT NULL,
+                         comment varchar(256) NOT NULL,
+                         confirmation_code varchar(256) NOT NULL,
+                         fee real NOT NULL,
+                         PRIMARY KEY (id)
+                         )'''
+                SQL(self.url).execute(req)
             current_version += 1
             req = 'update meta set value=? where name=?'
             SQL(self.url).execute(req, (current_version, 'db_version'))
