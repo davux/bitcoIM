@@ -86,10 +86,16 @@ class Component:
         if fromJID is None:
             fromJID = self.jid
         if fromJID == self.jid:
-            status = 'Current balance: %s' % user.getBalance()
+            status = 'Current balance: BTC %s' % user.getBalance()
         else:
-            #TODO: More useful information (number/percentage of payments received?)
-            status = None
+            address = Address(fromJID)
+            if user.ownsAddress(address):
+                status = 'This address is mine.'
+                if address.label:
+                    status += '\n' + address.label
+                #TODO: Include number/percentage of payments received
+            else:
+                status = None
         cnx.send(Presence(to=user.jid, typ='available', show='online', status=status, frm=fromJID))
 
     def addAddressToRoster(self, cnx, address, user):
