@@ -232,6 +232,8 @@ class Component:
         if not user in self.connectedUsers:
             self.sendBitcoinPresence(self.cnx, user)
             self.connectedUsers.add(user)
+            for address in user.getRoster():
+                self.sendBitcoinPresence(self.cnx, user, Address(address))
 
     def userResourceDisconnects(self, user, resource):
         '''Called when the component receives a presence "unavailable" from
@@ -240,9 +242,12 @@ class Component:
            and internally removes them from the list of online users.'''
         user.resourceDisconnects(resource)
         if (user in self.connectedUsers) and (0 == len(user.resources)):
-            #TODO: Send unavailable presence from bc addressses too
-            self.cnx.send(Presence(typ='unavailable', frm=self.jid, to=user.jid))
+            jid = JID(user.jid)
+            jid.setResource(resource=resource)
+            self.cnx.send(Presence(typ='unavailable', frm=self.jid, to=jid))
             self.connectedUsers.remove(user)
+            for address in user.getRoster():
+                self.cnx.send(Presence(typ='unavailable', frm=Address(address).asJID(), to=jid))
 
     def registrationRequested(self, cnx, iq):
         '''A registration request was received'''
