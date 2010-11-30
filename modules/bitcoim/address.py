@@ -48,3 +48,12 @@ class Address(BCAddress):
             suffix = ENCODING_SEP + suffix
         return JID(node=self.address.lower() + suffix, domain=component['jid'])
 
+    def getOwner(self):
+        from db import SQL
+        req = "select %s from %s where %s=?" % ('registered_jid', 'bitcoin_addresses', 'address')
+        SQL().execute(req, (self.address,))
+        row = SQL().fetchone()
+        if row:
+            return row[0]
+        else:
+            return None
