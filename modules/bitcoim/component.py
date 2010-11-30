@@ -8,7 +8,7 @@ from common import problem, debug
 from conf import bitcoin as bitcoin_conf
 from useraccount import UserAccount, AlreadyRegisteredError
 from xmpp.client import Component as XMPPComponent
-from xmpp.protocol import JID, Iq, Presence, Error, NodeProcessed, \
+from xmpp.protocol import JID, Message, Iq, Presence, Error, NodeProcessed, \
                           NS_IQ, NS_MESSAGE, NS_PRESENCE, NS_DISCO_INFO, \
                           NS_DISCO_ITEMS, NS_GATEWAY, NS_REGISTER, NS_VERSION
 from protocol import NS_NICK
@@ -116,17 +116,24 @@ class Component:
         error = None
         if not UserAccount(msg.getFrom()).isRegistered():
             error = "You're not registered. Please register, it's free!"
-        elif self.jid == msg.getTo().getStripped():
-            error = "You can't write a direct message to the gateway yet."
         else:
-            try:
-                debug('Trying to send a message to %s' % msg.getTo().getStripped())
-                address = Address(msg.getTo())
-                reply = address.command(msg.getFrom().getStripped(), msg.getBody())
-            except InvalidBitcoinAddressError:
-                error = 'This is not a valid address.'
-            except CommandSyntaxError, reason:
-                error = reason
+            if self.jid == msg.getTo().getStripped():
+                try:
+                    address = Address(msg.getBody())
+                    msg = Message(to=msg.getFrom(), frm=address.asJID(),\
+                          body='I\'m %s. Talk to me.' % address, typ='chat')
+                    cnx.send(msg)
+                    raise NodeProcessed
+                except InvalidBitcoinAddressError:
+                    error = "You can't write a direct message to me yet, unless it's a bitcoin address."
+            else:
+                try:
+                    address = Address(msg.getTo())
+                    reply = address.command(msg.getFrom().getStripped(), msg.getBody())
+                except InvalidBitcoinAddressError:
+                    error = 'This is not a valid bitcoin address.'
+                except CommandSyntaxError, reason:
+                    error = reason
         if error is None:
             msg = msg.buildReply(reply)
             msg.setType('chat')
