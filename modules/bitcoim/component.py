@@ -90,10 +90,11 @@ class Component:
         else:
             address = Address(fromJID)
             if user.ownsAddress(address):
-                status = 'This address is mine.'
+                status = 'This address is mine'
                 if address.label:
-                    status += '\n' + address.label
-                #TODO: Include number/percentage of payments received
+                    status += ' (%s)' % address.label
+                percentage = address.getPercentageReceived()
+                status += '\nReceived %s%% of total balance' % percentage
             else:
                 status = None
         cnx.send(Presence(to=user.jid, typ='available', show='online', status=status, frm=fromJID))
