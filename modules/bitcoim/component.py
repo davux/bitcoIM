@@ -158,6 +158,7 @@ class Component:
         if to == self.jid:
             if typ == 'subscribe':
                 cnx.send(Presence(typ='subscribed', frm=to, to=user.jid))
+                self.sendBitcoinPresence(cnx, user)
             elif typ == 'subscribed':
                 debug('We were allowed to see %s\'s presence.' % user)
             elif typ == 'unsubscribe':
@@ -182,6 +183,7 @@ class Component:
                 raise NodeProcessed # Just drop the case. TODO: Reply an error ("not-authorized" or something)
             if typ == 'subscribe':
                 cnx.send(Presence(typ='subscribed', frm=to, to=user.jid))
+                self.sendBitcoinPresence(cnx, user, prs.getTo())
             elif typ == 'unsubscribe':
                 debug('%s doesn\'t want to see address %s anymore. We should really honor that.' % user) #TODO: Implement hiding of addresses
             elif typ == 'probe':
