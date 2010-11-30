@@ -179,13 +179,11 @@ class Component:
             except InvalidBitcoinAddressError:
                 debug("Invalid address %s" % prs.getTo())
                 raise NodeProcessed # Just drop the case. TODO: Handle invalid addresses better
-            if not user.ownsAddress(address):
-                raise NodeProcessed # Just drop the case. TODO: Reply an error ("not-authorized" or something)
             if typ == 'subscribe':
                 cnx.send(Presence(typ='subscribed', frm=to, to=user.jid))
                 self.sendBitcoinPresence(cnx, user, prs.getTo())
             elif typ == 'unsubscribe':
-                debug('%s doesn\'t want to see address %s anymore. We should really honor that.' % user) #TODO: Implement hiding of addresses
+                cnx.send(Presence(typ='unsubscribed', frm=to, to=user.jid))
             elif typ == 'probe':
                 self.sendBitcoinPresence(cnx, user, address.asJID())
         raise NodeProcessed
