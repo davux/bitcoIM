@@ -61,14 +61,17 @@ class Address(BCAddress):
 
     def getPercentageReceived(self):
         '''Returns the percentage of bitcoins received on this address over the total received
-           by the same user.'''
+           by the same user. If nothing was received yet, return None.'''
         from useraccount import UserAccount
         user = UserAccount(JID(self.getOwner()))
         if user is None: # Shouldn't happen: we normally only care about addresses with an owner
             total = self.getReceived() # This way we always return 100%. TODO: use an exception
         else:
             total = user.getTotalReceived()
-        return self.getReceived() * 100 / total
+        if 0 != total:
+            return self.getReceived() * 100 / total
+        else:
+            return None
 
     def command(self, userJID, cmd):
         '''Interpret a command sent as a message. Return a line to show to the user.

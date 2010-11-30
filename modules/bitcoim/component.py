@@ -94,7 +94,8 @@ class Component:
                 if address.label:
                     status += ' (%s)' % address.label
                 percentage = address.getPercentageReceived()
-                status += '\nReceived %s%% of total balance' % percentage
+                if percentage is not None:
+                    status += '\nReceived %s%% of total balance' % percentage
             else:
                 status = None
         cnx.send(Presence(to=user.jid, typ='available', show='online', status=status, frm=fromJID))
