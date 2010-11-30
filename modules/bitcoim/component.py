@@ -49,7 +49,7 @@ class Component:
             user = UserAccount(JID(jid))
             self.sendBitcoinPresence(self.cnx, user)
             for addr in user.getRoster():
-                self.sendBitcoinPresence(self.cnx, user, Address(addr).asJID())
+                self.sendBitcoinPresence(self.cnx, user, addr)
 
     def handleDisco(self, cnx):
         '''Define the Service Discovery information for automatic handling
@@ -74,7 +74,7 @@ class Component:
         for user in self.connectedUsers:
             self.cnx.send(Presence(to=user.jid, frm=self.jid, typ='unavailable', status=message))
             for addr in user.getRoster():
-                self.cnx.send(Presence(to=user.jid, frm=Address(addr).asJID(), typ='unavailable', status=message))
+                self.cnx.send(Presence(to=user.jid, frm=addr, typ='unavailable', status=message))
         debug("Bye.")
 
     def sendBitcoinPresence(self, cnx, user, fromJID=None):
@@ -234,7 +234,7 @@ class Component:
             self.sendBitcoinPresence(self.cnx, user)
             self.connectedUsers.add(user)
             for address in user.getRoster():
-                self.sendBitcoinPresence(self.cnx, user, Address(address).asJID())
+                self.sendBitcoinPresence(self.cnx, user, address)
 
     def userResourceDisconnects(self, user, resource):
         '''Called when the component receives a presence "unavailable" from
@@ -248,7 +248,7 @@ class Component:
             self.cnx.send(Presence(typ='unavailable', frm=self.jid, to=jid))
             self.connectedUsers.remove(user)
             for address in user.getRoster():
-                self.cnx.send(Presence(typ='unavailable', frm=Address(address).asJID(), to=jid))
+                self.cnx.send(Presence(typ='unavailable', frm=address, to=jid))
 
     def registrationRequested(self, cnx, iq):
         '''A registration request was received'''

@@ -91,16 +91,20 @@ class UserAccount(object):
         return [result[i][0] for i in range(len(result))]
 
     def getRoster(self):
-        '''Return the set of all the addresses the user has in her/his roster.
+        '''Return the set of all the address JIDs the user has in her/his roster.
            This is different from the addresses the user has control over:
              - the user might want to ignore one of their own addresses,
                because there's no need to see them.
              - the user might want to see some addresses s/he doesn't own, in
                order to be able to easily send bitcoins to them.
+             - they are JIDs, not bitcoin addresses.
         '''
         #TODO: Make it an independant list. As a placeholder, it's currently
         #      equivalent to getAddresses().
-        return self.getAddresses()
+        roster = set()
+        for addr in self.getAddresses():
+            roster.add(Address(addr).asJID())
+        return roster
 
     def getBalance(self):
         '''Return the user's current balance'''
