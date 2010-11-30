@@ -184,7 +184,7 @@ class Component:
             elif typ == 'unsubscribe':
                 debug('%s doesn\'t want to see address %s anymore. We should really honor that.' % user) #TODO: Implement hiding of addresses
             elif typ == 'probe':
-                self.sendBitcoinPresence(cnx, user, Address(address).asJID())
+                self.sendBitcoinPresence(cnx, user, address.asJID())
         raise NodeProcessed
 
     def iqReceived(self, cnx, iq):
