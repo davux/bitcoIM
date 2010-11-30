@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # vi: sts=4 et sw=4
 
-from bitcoim.address import Address
+from bitcoim.address import Address, CommandSyntaxError
 from bitcoin.address import InvalidBitcoinAddressError
 from bitcoin.controller import Controller, BitcoinServerIOError
 from common import problem, debug
@@ -113,9 +113,28 @@ class Component:
 
     def messageReceived(self, cnx, msg):
         '''Message received'''
+        error = None
         if not UserAccount(msg.getFrom()).isRegistered():
-            return
-        debug("Message received from subscriber %s" % msg.getBody())
+            error = "You're not registered. Please register, it's free!"
+        elif self.jid == msg.getTo().getStripped():
+            error = "You can't write a direct message to the gateway yet."
+        else:
+            try:
+                debug('Trying to send a message to %s' % msg.getTo().getStripped())
+                address = Address(msg.getTo())
+                reply = address.command(msg.getFrom().getStripped(), msg.getBody())
+            except InvalidBitcoinAddressError:
+                error = 'This is not a valid address.'
+            except CommandSyntaxError, reason:
+                error = reason
+        if error is None:
+            msg = msg.buildReply(reply)
+            msg.setType('chat')
+        else:
+            msg = msg.buildReply("Error: %s" % error)
+            msg.setType('error')
+        cnx.send(msg)
+        raise NodeProcessed
 
     # If any presence stanza is received from an unregistered user, don't
     # even look at it. They should register first.
