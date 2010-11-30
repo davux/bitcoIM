@@ -16,7 +16,7 @@ class PaymentOrder(object):
         self.date = date
 
     @staticmethod
-    def genConfirmationCode(length=5, alphabet='abcdefghjkmnpqrstuvwxyz23456789'):
+    def genConfirmationCode(length=4, alphabet='abcdefghjkmnpqrstuvwxyz23456789'):
         '''Generate a random confirmation code of variable length, taken from a
            given set of characters. By default, the length is 6 and the possible
            characters are lowercase letters (except o, i and l to avoid confusion)
