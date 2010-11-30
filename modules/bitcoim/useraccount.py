@@ -90,6 +90,15 @@ class UserAccount(object):
         result = SQL().fetchall()
         return [result[i][0] for i in range(len(result))]
 
+    def getTotalReceived(self):
+        '''Returns the total amount received on all addresses the user has control over.'''
+        req = "select %s from %s where %s=?" % (FIELD_ADDRESS, TABLE_ADDR, FIELD_JID)
+        SQL().execute(req, (self.jid,))
+        total = 0
+        for address in SQL().fetchall():
+            total += Address(address[0]).getReceived()
+        return total
+
     def getRoster(self):
         '''Return the set of all the address JIDs the user has in her/his roster.
            This is different from the addresses the user has control over:
