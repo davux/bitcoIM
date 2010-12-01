@@ -123,10 +123,9 @@ class UserAccount(object):
         #TODO: Substract payments made by this user, when they can made them
         return total_received
 
-    def createAddress(self, label=None):
+    def createAddress(self):
         '''Create a new bitcoin address, associate it with the user, and return it'''
         address = Address()
-        address.label = label
         req = "insert into %s (%s, %s) values (?, ?)" % (TABLE_ADDR, FIELD_ADDRESS, FIELD_JID)
         SQL().execute(req, (str(address), self.jid))
         #TODO: Check that the creation went well before returning the address

@@ -91,8 +91,6 @@ class Component:
             address = Address(fromJID)
             if user.ownsAddress(address):
                 status = 'This address is mine'
-                if address.label:
-                    status += ' (%s)' % address.label
                 percentage = address.getPercentageReceived()
                 if percentage is not None:
                     status += '\nReceived %s%% of total balance' % percentage
@@ -101,14 +99,13 @@ class Component:
         cnx.send(Presence(to=user.jid, typ='available', show='online', status=status, frm=fromJID))
 
     def addAddressToRoster(self, cnx, address, user):
+        '''Add the JID corresponding to a given bitcoin address to user's
+           roster. The suggested name is the bitcoin address.'''
         msg = 'Hi! I\'m your new Bitcoin address'
-        label = address.label
-        if 0 != len(label):
-            msg += ' (%s)' % label
         pres = Presence(typ='subscribe', status=msg, frm=address.asJID(), to=user.jid)
         nick = Node('nick')
         nick.setNamespace(NS_NICK)
-        nick.setData(label)
+        nick.setData(address.address)
         pres.addChild(node=nick)
         cnx.send(pres)
 
