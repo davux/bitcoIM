@@ -107,6 +107,7 @@ class Address(BCAddress):
                 reply += ' (%s)' % comment
             reply += ". Please confirm by typing: confirm %s" % order.code
         elif 'help' == verb:
+            args = args.lower()
             if 'help' == args:
                 reply = 'Usage: help [<command>]'
             elif 'pay' == args:
