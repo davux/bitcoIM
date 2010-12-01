@@ -18,6 +18,8 @@ except ImportError:
     problem("Error: this program needs the Python XMPP library.", True)
 from bitcoim.component import Component
 
+reload(sys)
+sys.setdefaultencoding('utf8')
 SQL(url=db['file'])
 database = Database(db['file'])
 database.upgrade(1)
