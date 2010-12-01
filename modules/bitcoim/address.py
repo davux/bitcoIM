@@ -76,12 +76,20 @@ class Address(BCAddress):
     def command(self, userJID, cmd):
         '''Interpret a command sent as a message. Return a line to show to the user.
            NOTE: This function might not stay here.'''
-        words = cmd.split(None, 2)
-        if 0 == len(words):
+        cmd = cmd.split(None, 1)
+        if 0 == len(cmd):
             return None
-        if 'pay' == words[0]:
+        verb = cmd.pop(0)
+        try:
+            args = cmd[0]
+        except IndexError:
+            args = ''
+        # Now parsing can begin: args is a string, ready to be split in a variable number
+        # of parts, depending on the verb.
+        if 'pay' == verb:
+            args = args.split(None, 1)
             try:
-                amount = int(words[1])
+                amount = int(args.pop(0))
             except IndexError:
                 raise CommandSyntaxError, 'You must specify an amount.'
             except ValueError:
@@ -89,7 +97,7 @@ class Address(BCAddress):
             if amount <= 0:
                 raise CommandSyntaxError, 'The amount must be positive.'
             try:
-                comment = words[2]
+                comment = args.pop(0)
             except IndexError:
                 comment = ''
             order = PaymentOrder(userJID, self.address, amount, comment)
@@ -100,7 +108,7 @@ class Address(BCAddress):
             reply += ". Please confirm by typing: confirm %s" % order.code
             return reply
         else:
-            raise CommandSyntaxError, 'Unknown command \'%s\'' % words[0]
+            raise CommandSyntaxError, 'Unknown command \'%s\'' % verb
 
 class CommandSyntaxError(Exception):
     '''There was a syntax in the command.'''
