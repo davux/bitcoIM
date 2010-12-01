@@ -106,9 +106,18 @@ class Address(BCAddress):
             if 0 != len(comment):
                 reply += ' (%s)' % comment
             reply += ". Please confirm by typing: confirm %s" % order.code
-            return reply
+        elif 'help' == verb:
+            if 'help' == args:
+                reply = 'Usage: help [<command>]'
+            elif 'pay' == args:
+                reply = 'Usage: pay <amount> [<reason>]\n - <amount> must be a positive number\n - <reason> is a free-form text'
+            elif '' == args:
+                reply = 'Possible commands: pay, help. Type \'help <command>\' for details.'
+            else:
+                raise CommandSyntaxError, 'help: No such command \'%s\'' % args
         else:
             raise CommandSyntaxError, 'Unknown command \'%s\'' % verb
+        return reply
 
 class CommandSyntaxError(Exception):
     '''There was a syntax in the command.'''
