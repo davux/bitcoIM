@@ -79,7 +79,7 @@ class Address(BCAddress):
         cmd = cmd.split(None, 1)
         if 0 == len(cmd):
             return None
-        verb = cmd.pop(0)
+        verb = cmd.pop(0).lower()
         try:
             args = cmd[0]
         except IndexError:
