@@ -108,11 +108,8 @@ class UserAccount(object):
 
     def getBalance(self):
         '''Return the user's current balance'''
-        total_received = 0
-        for address in self.getAddresses():
-            total_received += Controller().getreceivedbyaddress(address)
         #TODO: Substract payments made by this user, when they can made them
-        return total_received
+        return self.getTotalReceived()
 
     def createAddress(self):
         '''Create a new bitcoin address, associate it with the user, and return it'''
