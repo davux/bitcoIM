@@ -85,19 +85,11 @@ class UserAccount(object):
 
     def getAddresses(self):
         '''Return the set of all addresses the user has control over'''
-        req = "select %s from %s where %s=?" % (FIELD_ADDRESS, TABLE_ADDR, FIELD_JID)
-        SQL().execute(req, (self.jid,))
-        result = SQL().fetchall()
-        return [result[i][0] for i in range(len(result))]
+        return Controller().getaddressesbyaccount(self.jid)
 
     def getTotalReceived(self):
         '''Returns the total amount received on all addresses the user has control over.'''
-        req = "select %s from %s where %s=?" % (FIELD_ADDRESS, TABLE_ADDR, FIELD_JID)
-        SQL().execute(req, (self.jid,))
-        total = 0
-        for address in SQL().fetchall():
-            total += Address(address[0]).getReceived()
-        return total
+        return Controller().getreceivedbyaccount(self.jid)
 
     def getRoster(self):
         '''Return the set of all the address JIDs the user has in her/his roster.
@@ -126,15 +118,11 @@ class UserAccount(object):
     def createAddress(self):
         '''Create a new bitcoin address, associate it with the user, and return it'''
         address = Address()
-        req = "insert into %s (%s, %s) values (?, ?)" % (TABLE_ADDR, FIELD_ADDRESS, FIELD_JID)
-        SQL().execute(req, (str(address), self.jid))
-        #TODO: Check that the creation went well before returning the address
+        Controller().setaccount(address.address, self.jid)
         return address
 
     def ownsAddress(self, address):
-        req = "select %s from %s where %s=? and %s=?" % (FIELD_ID, TABLE_ADDR, FIELD_ADDRESS, FIELD_JID)
-        SQL().execute(req, (str(address), self.jid))
-        return SQL().fetchone() is not None
+        return self.jid == address.account
 
 class AlreadyRegisteredError(Exception):
     '''A JID is already registered at the gateway.'''

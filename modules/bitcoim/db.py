@@ -81,13 +81,6 @@ class Database(object):
                          PRIMARY KEY (id)
                          )'''
                 SQL(self.url).execute(req)
-                req = '''CREATE TABLE IF NOT EXISTS bitcoin_addresses (
-                         id INTEGER NOT NULL,
-                         address varchar(256) NOT NULL,
-                         registered_jid varchar(256) NOT NULL,
-                         PRIMARY KEY (id)
-                         )'''
-                SQL(self.url).execute(req)
                 req = '''CREATE TABLE IF NOT EXISTS payments (
                          id INTEGER NOT NULL,
                          from_jid varchar(256) NOT NULL,
