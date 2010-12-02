@@ -49,15 +49,11 @@ class Address(BCAddress):
             suffix = ENCODING_SEP + suffix
         return JID(node=self.address.lower() + suffix, domain=component['jid'])
 
-    def getOwner(self):
-        '''Obsolete. Equivalent to attribute "account".'''
-        return self.account
-
     def getPercentageReceived(self):
         '''Returns the percentage of bitcoins received on this address over the total received
            by the same user. If nothing was received yet, return None.'''
         from useraccount import UserAccount
-        user = UserAccount(JID(self.getOwner()))
+        user = UserAccount(JID(self.account))
         total = user.getTotalReceived()
         if 0 != total:
             return self.getReceived() * 100 / total
