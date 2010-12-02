@@ -11,8 +11,6 @@ from xmpp.protocol import JID
 FIELD_ID = 'id'
 FIELD_JID = 'registered_jid'
 TABLE_REG = 'registrations'
-TABLE_ADDR = 'bitcoin_addresses'
-FIELD_ADDRESS = 'address'
 
 class UserAccount(object):
     '''Represents a user that's registered on the gateway.
@@ -49,12 +47,14 @@ class UserAccount(object):
 
     def isRegistered(self):
         '''Return whether a given JID is already registered.'''
+        #TODO: Simply check whether this user has an address
         req = "select %s from %s where %s=?" % (FIELD_ID, TABLE_REG, FIELD_JID)
         SQL().execute(req, (unicode(self.jid),))
         return SQL().fetchone() is not None
 
     def register(self):
         '''Add given JID to subscribers if possible. Raise exception otherwise.'''
+        #TODO: Simply create an address for them
         if self.isRegistered():
             raise AlreadyRegisteredError
         req = "insert into %s (%s) values (?)" % (TABLE_REG, FIELD_JID)
@@ -62,6 +62,7 @@ class UserAccount(object):
 
     def unregister(self):
         '''Remove given JID from subscribers if it exists. Raise exception otherwise.'''
+        #TODO: Simply delete or change the account information on the user's address(es)
         req = "delete from %s where %s=?" % (TABLE_REG, FIELD_JID)
         curs = SQL().execute(req, (self.jid,))
         if curs:
@@ -71,8 +72,6 @@ class UserAccount(object):
                 raise AlreadyUnregisteredError
             elif 1 != count:
                 debug("We deleted %s rows when unregistering %s. This is not normal." % (count, jid))
-            req = "delete from %s where %s=?" % (TABLE_ADDR, FIELD_JID)
-            SQL().execute(req, (self.jid,))
 
     def resourceConnects(self, resource):
         self.resources.add(resource)
