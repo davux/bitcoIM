@@ -103,7 +103,7 @@ class UserAccount(object):
         #      equivalent to getAddresses().
         roster = set()
         for addr in self.getAddresses():
-            roster.add(Address(addr).asJID())
+            roster.add(Address(addr).jid)
         return roster
 
     def getBalance(self):

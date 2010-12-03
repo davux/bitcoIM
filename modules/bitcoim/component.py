@@ -102,7 +102,7 @@ class Component:
         '''Add the JID corresponding to a given bitcoin address to user's
            roster. The suggested name is the bitcoin address.'''
         msg = 'Hi! I\'m your new Bitcoin address'
-        pres = Presence(typ='subscribe', status=msg, frm=address.asJID(), to=user.jid)
+        pres = Presence(typ='subscribe', status=msg, frm=address.jid, to=user.jid)
         nick = Node('nick')
         nick.setNamespace(NS_NICK)
         nick.setData(address.address)
@@ -118,7 +118,7 @@ class Component:
             if self.jid == msg.getTo().getStripped():
                 try:
                     address = Address(msg.getBody())
-                    msg = Message(to=msg.getFrom(), frm=address.asJID(),\
+                    msg = Message(to=msg.getFrom(), frm=address.jid,\
                           body='I\'m %s. Talk to me.' % address, typ='chat')
                     cnx.send(msg)
                     raise NodeProcessed
@@ -182,7 +182,7 @@ class Component:
             elif typ == 'unsubscribe':
                 cnx.send(Presence(typ='unsubscribed', frm=to, to=user.jid))
             elif typ == 'probe':
-                self.sendBitcoinPresence(cnx, user, address.asJID())
+                self.sendBitcoinPresence(cnx, user, address.jid)
         raise NodeProcessed
 
     def iqReceived(self, cnx, iq):
@@ -243,7 +243,7 @@ class Component:
                         prompt = children[0].getData()
                         try:
                             jid = Node('jid')
-                            jid.setData(Address(prompt).asJID())
+                            jid.setData(Address(prompt).jid)
                             reply = iq.buildReply('result')
                             query = reply.getTag('query')
                             query.addChild(node=jid)
