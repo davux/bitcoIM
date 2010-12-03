@@ -135,6 +135,8 @@ class UserAccount(object):
         # Now parsing can begin: args is a string, ready to be split in a variable number
         # of parts, depending on the verb.
         if 'pay' == verb:
+            if address is None:
+                raise CommandTargetError
             args = args.split(None, 1)
             try:
                 amount = int(args.pop(0))
@@ -161,7 +163,10 @@ class UserAccount(object):
             elif 'pay' == args:
                 reply = 'Usage: pay <amount> [<reason>]\n - <amount> must be a positive number\n - <reason> is a free-form text'
             elif '' == args:
-                reply = 'Possible commands: pay, help. Type \'help <command>\' for details.'
+                if address is None:
+                    reply = 'Possible commands: help. Type \'help <command>\' for details. You can also type a bitcoin address directly to start a chat.'
+                else:
+                    reply = 'Possible commands: pay, help. Type \'help <command>\' for details.'
             else:
                 raise CommandSyntaxError, 'help: No such command \'%s\'' % args
         else:
@@ -177,6 +182,13 @@ class AlreadyUnregisteredError(Exception):
     '''An unregisration was asked but the JID wasn't registered at the gateway.'''
     pass
 
-class CommandSyntaxError(Exception):
+class CommandError(Exception):
+    '''Generic error in command.'''
+
+class CommandSyntaxError(CommandError):
     '''There was a syntax in the command.'''
+    pass
+
+class CommandTargetError(CommandError):
+    '''The target of the command is wrong (address instead of gateway or viceversa).'''
     pass

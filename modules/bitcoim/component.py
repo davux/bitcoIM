@@ -6,7 +6,8 @@ from bitcoin.address import InvalidBitcoinAddressError
 from bitcoin.controller import Controller, BitcoinServerIOError
 from common import problem, debug
 from conf import bitcoin as bitcoin_conf
-from useraccount import UserAccount, AlreadyRegisteredError, CommandSyntaxError
+from useraccount import UserAccount, AlreadyRegisteredError, \
+                        CommandSyntaxError, CommandTargetError
 from xmpp.client import Component as XMPPComponent
 from xmpp.protocol import JID, Message, Iq, Presence, Error, NodeProcessed, \
                           NS_IQ, NS_MESSAGE, NS_PRESENCE, NS_DISCO_INFO, \
@@ -126,6 +127,8 @@ class Component:
                 except InvalidBitcoinAddressError:
                     try:
                         reply = user.command(msg.getBody())
+                    except CommandTargetError:
+                        error = 'This command only works with an address'
                     except CommandSyntaxError, reason:
                         error = reason
             else:
@@ -134,6 +137,8 @@ class Component:
                     reply = user.command(msg.getBody(), address.address)
                 except InvalidBitcoinAddressError:
                     error = 'This is not a valid bitcoin address.'
+                except CommandTargetError:
+                    error = 'This command only works with the gateway'
                 except CommandSyntaxError, reason:
                     error = reason
         if error is None:
