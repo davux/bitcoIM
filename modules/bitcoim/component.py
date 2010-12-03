@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # vi: sts=4 et sw=4
 
-from bitcoim.address import Address, CommandSyntaxError
+from bitcoim.address import Address
 from bitcoin.address import InvalidBitcoinAddressError
 from bitcoin.controller import Controller, BitcoinServerIOError
 from common import problem, debug
 from conf import bitcoin as bitcoin_conf
-from useraccount import UserAccount, AlreadyRegisteredError
+from useraccount import UserAccount, AlreadyRegisteredError, CommandSyntaxError
 from xmpp.client import Component as XMPPComponent
 from xmpp.protocol import JID, Message, Iq, Presence, Error, NodeProcessed, \
                           NS_IQ, NS_MESSAGE, NS_PRESENCE, NS_DISCO_INFO, \
@@ -112,7 +112,8 @@ class Component:
     def messageReceived(self, cnx, msg):
         '''Message received'''
         error = None
-        if not UserAccount(msg.getFrom()).isRegistered():
+        user = UserAccount(msg.getFrom())
+        if not user.isRegistered():
             error = "You're not registered. Please register, it's free!"
         else:
             if self.jid == msg.getTo().getStripped():
@@ -123,11 +124,14 @@ class Component:
                     cnx.send(msg)
                     raise NodeProcessed
                 except InvalidBitcoinAddressError:
-                    error = "You can't write a direct message to me yet, unless it's a bitcoin address."
+                    try:
+                        reply = user.command(msg.getBody())
+                    except CommandSyntaxError, reason:
+                        error = reason
             else:
                 try:
                     address = Address(msg.getTo())
-                    reply = address.command(msg.getFrom().getStripped(), msg.getBody())
+                    reply = user.command(msg.getBody(), address.address)
                 except InvalidBitcoinAddressError:
                     error = 'This is not a valid bitcoin address.'
                 except CommandSyntaxError, reason:
