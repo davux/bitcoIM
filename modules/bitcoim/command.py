@@ -23,20 +23,10 @@ class Command(object):
         '''Constructor. user is the user that sent the command, action is the
            action to perform. arguments is an array of words, target is either
            an address or None if it's the gateway itself.'''
-        self.action = action
+        self.action = action.lower()
         self.user = user
         self.arguments = arguments
         self.target = target
-
-    def __setattr__(self, name, value):
-        if 'action' == name:
-            self._action = value.lower()
-        else:
-            object.__setattr__(self, name, value)
-
-    def __getattr__(self, name):
-        if 'action' == name:
-            return self._action
 
     def usage(self):
         if COMMAND_PAY == self.action:
