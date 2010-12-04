@@ -1,3 +1,5 @@
+from paymentorder import PaymentOrder
+
 COMMAND_HELP = 'help'
 COMMAND_PAY = 'pay'
 
@@ -50,7 +52,7 @@ class Command(object):
                 comment = self.arguments.pop(0)
             except IndexError:
                 comment = ''
-            return self._executePay(user.jid, amount, self.target, comment)
+            return self._executePay(self.user, amount, self.target, comment)
         elif COMMAND_HELP == self.action:
             try:
                 targetCommand = self.arguments.pop(0)
