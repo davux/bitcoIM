@@ -2,12 +2,14 @@
 # vi: sts=4 et sw=4
 
 from bitcoim.address import Address
+from bitcoim.command import Command, parse as parseCommand, \
+                            CommandSyntaxError, CommandTargetError
+
 from bitcoin.address import InvalidBitcoinAddressError
 from bitcoin.controller import Controller, BitcoinServerIOError
 from common import problem, debug
 from conf import bitcoin as bitcoin_conf
-from useraccount import UserAccount, AlreadyRegisteredError, \
-                        CommandSyntaxError, CommandTargetError
+from useraccount import UserAccount, AlreadyRegisteredError
 from xmpp.client import Component as XMPPComponent
 from xmpp.protocol import JID, Message, Iq, Presence, Error, NodeProcessed, \
                           NS_IQ, NS_MESSAGE, NS_PRESENCE, NS_DISCO_INFO, \
@@ -126,15 +128,17 @@ class Component:
                     raise NodeProcessed
                 except InvalidBitcoinAddressError:
                     try:
-                        reply = user.command(msg.getBody())
+                        (action, args) = parseCommand(msg.getBody())
+                        reply = Command(action, user, args).execute()
                     except CommandTargetError:
                         error = 'This command only works with an address'
                     except CommandSyntaxError, reason:
                         error = reason
             else:
                 try:
-                    address = Address(msg.getTo())
-                    reply = user.command(msg.getBody(), address.address)
+                    address = Address(msg.getTo()).address
+                    (action, args) = parseCommand(msg.getBody())
+                    reply = Command(action, user, args, address).execute()
                 except InvalidBitcoinAddressError:
                     error = 'This is not a valid bitcoin address.'
                 except CommandTargetError:

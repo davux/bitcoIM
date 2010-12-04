@@ -120,59 +120,6 @@ class UserAccount(object):
     def ownsAddress(self, address):
         return self.jid == address.account
 
-    def command(self, cmd, address=None):
-        '''Interpret a command sent as a message. Return a line to show to the user.
-           The 'address' argument is the bitcoin address the command is about.
-           If address is None, the command was sent to the gateway itself.'''
-        cmd = cmd.split(None, 1)
-        if 0 == len(cmd):
-            return None
-        verb = cmd.pop(0).lower()
-        try:
-            args = cmd[0]
-        except IndexError:
-            args = ''
-        # Now parsing can begin: args is a string, ready to be split in a variable number
-        # of parts, depending on the verb.
-        if 'pay' == verb:
-            if address is None:
-                raise CommandTargetError
-            args = args.split(None, 1)
-            try:
-                amount = int(args.pop(0))
-            except IndexError:
-                raise CommandSyntaxError, 'You must specify an amount.'
-            except ValueError:
-                raise CommandSyntaxError, 'The amount must be a number.'
-            if amount <= 0:
-                raise CommandSyntaxError, 'The amount must be positive.'
-            try:
-                comment = args.pop(0)
-            except IndexError:
-                comment = ''
-            order = PaymentOrder(self.jid, address, amount, comment)
-            order.queue()
-            reply = "You want to pay BTC %s to address %s" % (amount, order.address)
-            if 0 != len(comment):
-                reply += ' (%s)' % comment
-            reply += ". Please confirm by typing: confirm %s" % order.code
-        elif 'help' == verb:
-            args = args.lower()
-            if 'help' == args:
-                reply = 'Usage: help [<command>]'
-            elif 'pay' == args:
-                reply = 'Usage: pay <amount> [<reason>]\n - <amount> must be a positive number\n - <reason> is a free-form text'
-            elif '' == args:
-                if address is None:
-                    reply = 'Possible commands: help. Type \'help <command>\' for details. You can also type a bitcoin address directly to start a chat.'
-                else:
-                    reply = 'Possible commands: pay, help. Type \'help <command>\' for details.'
-            else:
-                raise CommandSyntaxError, 'help: No such command \'%s\'' % args
-        else:
-            raise CommandSyntaxError, 'Unknown command \'%s\'' % verb
-        return reply
-
 
 class AlreadyRegisteredError(Exception):
     '''A JID is already registered at the gateway.'''
@@ -180,15 +127,4 @@ class AlreadyRegisteredError(Exception):
 
 class AlreadyUnregisteredError(Exception):
     '''An unregisration was asked but the JID wasn't registered at the gateway.'''
-    pass
-
-class CommandError(Exception):
-    '''Generic error in command.'''
-
-class CommandSyntaxError(CommandError):
-    '''There was a syntax in the command.'''
-    pass
-
-class CommandTargetError(CommandError):
-    '''The target of the command is wrong (address instead of gateway or viceversa).'''
     pass
