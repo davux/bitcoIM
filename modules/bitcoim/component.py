@@ -143,7 +143,7 @@ class Component:
                 try:
                     address = Address(msg.getTo()).address
                     (action, args) = parseCommand(msg.getBody())
-                    reply = Command(action, user, args, address).execute()
+                    reply = Command(action, args, address).execute(user)
                 except InvalidBitcoinAddressError:
                     error = 'This is not a valid bitcoin address.'
                 except CommandTargetError:
