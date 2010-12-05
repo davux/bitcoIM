@@ -311,7 +311,7 @@ class Component:
         user = UserAccount(frm)
         try:
             user.register()
-            new_address = user.createAddress('My first address at %s' % self.jid)
+            new_address = user.createAddress()
             self.addAddressToRoster(cnx, new_address, user)
         except AlreadyRegisteredError:
             isUpdate = True # This would be stupid, since there's no registration info to update
