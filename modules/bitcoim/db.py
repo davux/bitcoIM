@@ -35,6 +35,7 @@ class SQL(object):
             cls.cache[url].close = cls.cache[url].conn.close
             cls.cache[url].fetchone = cls.cache[url].cursor.fetchone
             cls.cache[url].fetchall = cls.cache[url].cursor.fetchall
+            cls.cache[url].lastrowid = cls.cache[url].cursor.lastrowid
         return cls.cache[url]
 
     @classmethod
@@ -90,6 +91,7 @@ class Database(object):
                          comment varchar(256) NOT NULL,
                          confirmation_code varchar(256) NOT NULL,
                          fee real NOT NULL,
+                         paid integer NOT NULL default 0,
                          PRIMARY KEY (id)
                          )'''
                 SQL(self.url).execute(req)
