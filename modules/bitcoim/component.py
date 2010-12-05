@@ -2,8 +2,9 @@
 # vi: sts=4 et sw=4
 
 from bitcoim.address import Address
-from bitcoim.command import Command, parse as parseCommand, \
-                            CommandSyntaxError, CommandTargetError
+from bitcoim.command import Command, parse as parseCommand, COMMAND_HELP, \
+                            CommandSyntaxError, CommandTargetError, \
+                            UnknownCommandError
 
 from bitcoin.address import InvalidBitcoinAddressError
 from bitcoin.controller import Controller, BitcoinServerIOError
@@ -132,6 +133,10 @@ class Component:
                         reply = Command(action, user, args).execute()
                     except CommandTargetError:
                         error = 'This command only works with an address'
+                    except UnknownCommandError:
+                        error = ('Unknown command \'%s\'. Type \'%s\' for a ' \
+                                 + 'list of accepted commands.') \
+                                % (action, COMMAND_HELP)
                     except CommandSyntaxError, reason:
                         error = reason
             else:
@@ -143,6 +148,10 @@ class Component:
                     error = 'This is not a valid bitcoin address.'
                 except CommandTargetError:
                     error = 'This command only works with the gateway'
+                except UnknownCommandError:
+                    error = ('Unknown command \'%s\'. Type \'%s\' for a ' \
+                             + 'list of accepted commands.') \
+                            % (action, COMMAND_HELP)
                 except CommandSyntaxError, reason:
                     error = reason
         if error is None:
