@@ -21,12 +21,11 @@ def parse(line):
 class Command(object):
     '''A command that is sent to the component.'''
 
-    def __init__(self, action, user=None, arguments=[], target=None):
-        '''Constructor. user is the user that sent the command, action is the
-           action to perform. arguments is an array of words, target is either
-           an address or None if it's the gateway itself.'''
+    def __init__(self, action, arguments=[], target=None):
+        '''Constructor. action is the action to perform. arguments is an array
+           of words, target is either an address or None if it's the gateway
+           itself.'''
         self.action = action.lower()
-        self.user = user
         self.arguments = arguments
         self.target = target
 
@@ -38,9 +37,7 @@ class Command(object):
         else:
             raise UnknownCommandError
 
-    def execute(self):
-        if self.user is None:
-            raise AnonymousCommandError
+    def execute(self, user):
         if COMMAND_PAY == self.action:
             if self.target is None:
                 raise CommandTargetError
@@ -52,7 +49,7 @@ class Command(object):
                 comment = self.arguments.pop(0)
             except IndexError:
                 comment = ''
-            return self._executePay(self.user, amount, self.target, comment)
+            return self._executePay(user, amount, self.target, comment)
         elif COMMAND_HELP == self.action:
             try:
                 targetCommand = self.arguments.pop(0)
@@ -103,7 +100,3 @@ class UnknownCommandError(CommandSyntaxError):
 class CommandTargetError(CommandError):
     '''The target of the command is wrong (address instead of gateway or
        viceversa).'''
-
-class AnonymousCommandError(CommandError):
-    '''No user was given, so the command can't be executed. This is a
-       programming error.'''

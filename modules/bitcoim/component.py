@@ -130,7 +130,7 @@ class Component:
                 except InvalidBitcoinAddressError:
                     try:
                         (action, args) = parseCommand(msg.getBody())
-                        reply = Command(action, user, args).execute()
+                        reply = Command(action, args).execute(user)
                     except CommandTargetError:
                         error = 'This command only works with an address'
                     except UnknownCommandError:
