@@ -1,3 +1,4 @@
+from bitcoin.controller import Controller
 from common import debug
 from datetime import datetime
 from db import SQL
@@ -14,9 +15,12 @@ class PaymentOrder(object):
             self.comment = comment
             self.fee = fee
             self.date = None
+            self.paid = False
+            self.entryId = None
         else:
+            debug("We want to fetch payment with code '%s'" % code)
             self.code = code
-            condition = 'from_jid=? and code=?'
+            condition = 'from_jid=? and confirmation_code=?'
             values = [from_jid, code]
             if address is not None:
                 condition += ' and recipient=?'
@@ -24,22 +28,23 @@ class PaymentOrder(object):
             if amount is not None:
                 condition += ' and amount=?'
                 values.append(amount)
-            if comment is not None:
+            if comment != '':
                 condition += ' and comment=?'
                 values.append(comment)
-            if fee is not None:
+            if fee != 0:
                 condition += ' and fee=?'
                 values.append(fee)
-            req = 'select %s, %s, %s, %s, %s from %s where %s' % \
-                  ('date', 'recipient', 'amount', 'comment', 'fee', \
-                   'payments', condition)
+            req = 'select %s, %s, %s, %s, %s, %s, %s from %s where %s' % \
+                  ('id', 'date', 'recipient', 'amount', 'comment', 'fee', \
+                   'paid', 'payments', condition)
+            debug("SQL query: %s" % req)
             SQL().execute(req, tuple(values))
             paymentOrder = SQL().fetchone()
             if paymentOrder is None:
                 raise PaymentNotFoundError
             else:
-                (self.date, self.address, self.amount, \
-                 self.comment, self.fee) = tuple(paymentOrder)
+                (self.entryId, self.date, self.address, self.amount, \
+                 self.comment, self.fee, self.paid) = tuple(paymentOrder)
 
     @staticmethod
     def genConfirmationCode(length=4, alphabet='abcdefghjkmnpqrstuvwxyz23456789'):
@@ -58,6 +63,28 @@ class PaymentOrder(object):
         req = 'insert into %s (%s, %s, %s, %s, %s, %s, %s) values (?, ?, ?, ?, ?, ?, ?)' % \
               ('payments', 'from_jid', 'date', 'recipient', 'amount', 'comment', 'confirmation_code', 'fee')
         SQL().execute(req, (self.jid, self.date, self.address, self.amount, self.comment, self.code, self.fee))
+        self.entryId = SQL().lastrowid
+
+    def confirm(self, code):
+        '''Actually send the bitcoins to the recipient. The code is only
+           required for extra security.'''
+        if code != self.code:
+            raise InvalidCodeError
+        try:
+            self.code = Controller().sendtoaddress(self.address, self.amount, \
+                                                   self.comment)
+        except jsonrpc.proxy.JSONRPCException:
+            raise PaymentError, 'Could not make payment. Maybe you don\'t have enough bitcoins?'
+        debug("Payment made to by %s to %s (BTC %s). Comment: %s" % (self.jid, self.address, self.amount, self.comment))
+        self.date = datetime.now()
+        self.paid = True
+        req = 'update %s set %s=?, %s=?, %s=? where %s=?' % \
+              ('payments', 'paid', 'date', 'confirmation_code', 'id')
+        SQL().execute(req, (self.paid, self.date, self.code, self.entryId))
+        return self.code
 
 class PaymentNotFoundError(Exception):
     '''The requested payment was not found.'''
+
+class PaymentError(Exception):
+    '''The payment could not be made'''
