@@ -3,7 +3,7 @@
 # vi: sts=4 et sw=4
 
 import sys
-sys.path = ['./modules/'] + sys.path
+sys.path = ['./python/'] + sys.path
 from bitcoim.db import SQL, Database
 from bitcoin.controller import Controller
 from common import problem, debug
