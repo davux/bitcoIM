@@ -6,16 +6,19 @@ import sys
 sys.path = ['./python/'] + sys.path
 from bitcoim.db import SQL, Database
 from bitcoin.controller import Controller
-from common import problem, debug
 from conf import bitcoin as bitcoinConf, db
+from logging import error
+
 try:
     from conf import component as info
 except ImportError:
-    problem("Error: Please create a file named 'conf.py' (e.g. rename and edit conf.py.example).", True)
+    error("Error: Please create a file named 'conf.py' (e.g. rename and edit conf.py.example).\n")
+    sys.exit(1)
 try:
     from xmpp import client, protocol
 except ImportError:
-    problem("Error: this program needs the Python XMPP library.", True)
+    error("Error: this program needs the Python XMPP library.")
+    sys.exit(1)
 from bitcoim.component import Component
 
 reload(sys)
@@ -26,11 +29,13 @@ database.upgrade(1)
 try:
     Controller(bitcoinConf['user'], bitcoinConf['password']).getinfo()
 except IOError:
-    problem("Communication error with bitcoin client", True)
+    error("Communication error with bitcoin client")
+    sys.exit(1)
 try:
     bitcoIM = Component(info['jid'], info['password'], info['server'], info['port'])
 except Exception, message:
-    problem("Error while connecting to server: %s" % (message), True)
+    error("Error while connecting to server: %s" % (message))
+    sys.exit(1)
 try:
     bitcoIM.loop(10)
 except KeyboardInterrupt:
