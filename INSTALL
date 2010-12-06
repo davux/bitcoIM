@@ -1,3 +1,12 @@
+# Dependencies
+
+This program requires the following Python modules to work:
+  - xmpppy: http://xmpppy.sourceforge.net/
+  - bitcoin: http://gitorious.org/python-bitcoin/
+
+
+# Configuration
+
 Edit conf.py.example and rename it to conf.py.
 
 In the 'component' section, set up the credentials that should be used
