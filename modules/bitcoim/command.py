@@ -84,7 +84,7 @@ class Command(object):
         except PaymentNotFoundError:
             raise CommandError, 'No payment was found with code \'%s\'' % code
         try:
-            transactionId = payment.confirm(code)
+            transactionId = payment.confirm()
         except PaymentError, message:
             raise CommandError, 'Can\'t confirm: %s' % message
         reply = "Payment done. Transaction ID: %s" % transactionId

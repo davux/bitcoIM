@@ -65,11 +65,8 @@ class PaymentOrder(object):
         SQL().execute(req, (self.jid, self.date, self.address, self.amount, self.comment, self.code, self.fee))
         self.entryId = SQL().lastrowid
 
-    def confirm(self, code):
-        '''Actually send the bitcoins to the recipient. The code is only
-           required for extra security.'''
-        if code != self.code:
-            raise InvalidCodeError
+    def confirm(self):
+        '''Actually send the bitcoins to the recipient.'''
         try:
             self.code = Controller().sendtoaddress(self.address, self.amount, \
                                                    self.comment)
