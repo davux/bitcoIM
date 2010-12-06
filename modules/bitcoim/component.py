@@ -4,7 +4,7 @@
 from bitcoim.address import Address
 from bitcoim.command import Command, parse as parseCommand, COMMAND_HELP, \
                             CommandSyntaxError, CommandTargetError, \
-                            UnknownCommandError
+                            CommandError, UnknownCommandError
 
 from bitcoin.address import InvalidBitcoinAddressError
 from bitcoin.controller import Controller, BitcoinServerIOError
@@ -139,6 +139,8 @@ class Component:
                                 % (action, COMMAND_HELP)
                     except CommandSyntaxError, reason:
                         error = reason
+                    except CommandError, reason:
+                        error = reason
             else:
                 try:
                     address = Address(msg.getTo()).address
@@ -153,6 +155,8 @@ class Component:
                              + 'list of accepted commands.') \
                             % (action, COMMAND_HELP)
                 except CommandSyntaxError, reason:
+                    error = reason
+                except CommandError, reason:
                     error = reason
         if error is None:
             msg = msg.buildReply(reply)
