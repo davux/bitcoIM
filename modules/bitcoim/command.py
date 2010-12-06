@@ -1,7 +1,8 @@
-from paymentorder import PaymentOrder
+from paymentorder import PaymentOrder, PaymentError, PaymentNotFoundError
 
 COMMAND_HELP = 'help'
 COMMAND_PAY = 'pay'
+COMMAND_CONFIRM = 'confirm'
 
 def parse(line):
     '''Parse a command line and return a tuple (action, arguments), where
@@ -50,6 +51,12 @@ class Command(object):
             except IndexError:
                 comment = ''
             return self._executePay(user, amount, self.target, comment)
+        elif COMMAND_CONFIRM == self.action:
+            try:
+                code = self.arguments.pop(0)
+            except IndexError:
+                raise CommandSyntaxError, 'You must give a confirmation code.'
+            return self._executeConfirm(user, code)
         elif COMMAND_HELP == self.action:
             try:
                 targetCommand = self.arguments.pop(0)
@@ -72,6 +79,18 @@ class Command(object):
         if 0 != len(comment):
             reply += ' (%s)' % comment
         reply += ". Please confirm by typing: confirm %s" % order.code
+        return reply
+
+    def _executeConfirm(self, user, code):
+        try:
+            payment = PaymentOrder(user.jid, code=code)
+        except PaymentNotFoundError:
+            raise CommandError, 'No payment was found with code \'%s\'' % code
+        try:
+            transactionId = payment.confirm(code)
+        except PaymentError, message:
+            raise CommandError, 'Can\'t confirm: %s' % message
+        reply = "Payment done. Transaction ID: %s" % transactionId
         return reply
 
     def _executeHelp(self, target, command=None):
