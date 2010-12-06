@@ -46,10 +46,7 @@ class Command(object):
                 amount = self.arguments.pop(0)
             except IndexError:
                 raise CommandSyntaxError, 'You must specify an amount.'
-            try:
-                comment = self.arguments.pop(0)
-            except IndexError:
-                comment = ''
+            comment = ' '.join(self.arguments)
             return self._executePay(user, amount, self.target, comment)
         elif COMMAND_CONFIRM == self.action:
             try:
