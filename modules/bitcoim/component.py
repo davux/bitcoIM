@@ -7,9 +7,8 @@ from bitcoim.command import Command, parse as parseCommand, COMMAND_HELP, \
                             CommandError, UnknownCommandError
 
 from bitcoin.address import InvalidBitcoinAddressError
-from bitcoin.controller import Controller, BitcoinServerIOError
+from bitcoin.controller import Controller
 from common import problem, debug
-from conf import bitcoin as bitcoin_conf
 from useraccount import UserAccount, AlreadyRegisteredError
 from xmpp.client import Component as XMPPComponent
 from xmpp.protocol import JID, Message, Iq, Presence, Error, NodeProcessed, \
@@ -36,7 +35,6 @@ class Component:
              and from each of their "contacts" (bitcoin addresses)
         '''
         self.bye = False
-        Controller(bitcoin_conf['user'], bitcoin_conf['password']).getinfo() # This will raise an exception if there's a connection problem
         self.cnx = XMPPComponent(jid, port, debug=['socket'])
         self.jid = jid
         self.connectedUsers = set()

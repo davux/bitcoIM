@@ -5,9 +5,9 @@
 import sys
 sys.path = ['./modules/'] + sys.path
 from bitcoim.db import SQL, Database
-from bitcoin.controller import BitcoinServerIOError
+from bitcoin.controller import Controller
 from common import problem, debug
-from conf import db
+from conf import bitcoin as bitcoinConf, db
 try:
     from conf import component as info
 except ImportError:
@@ -24,9 +24,11 @@ SQL(url=db['file'])
 database = Database(db['file'])
 database.upgrade(1)
 try:
+    Controller(bitcoinConf['user'], bitcoinConf['password']).getinfo()
+except IOError:
+    problem("Communication error with bitcoin client", True)
+try:
     bitcoIM = Component(info['jid'], info['password'], info['server'], info['port'])
-except BitcoinServerIOError:
-    problem("Communication error with bitcoin client")
 except Exception, message:
     problem("Error while connecting to server: %s" % (message), True)
 try:
