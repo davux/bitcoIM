@@ -16,6 +16,10 @@ try:
 except (IndexError, NoSectionError, NoOptionError):
     loglevel = INFO
 basicConfig(level=loglevel)
+if loglevel <= DEBUG:
+    xmppdebug = ['socket']
+else:
+    xmppdebug = []
 
 # Set up XMPP
 import sys
@@ -72,7 +76,8 @@ except NoOptionError:
     critical("No connection information found in [XMPP] section of the configuration")
     sys.exit(1)
 try:
-    bitcoIM = Component(componentJid, componentPass,componentServer, componentPort)
+    bitcoIM = Component(componentJid, componentPass, componentServer,
+                        componentPort, xmppdebug)
 except Exception, message:
     critical("Error while connecting to server: %s" % (message))
     sys.exit(1)
