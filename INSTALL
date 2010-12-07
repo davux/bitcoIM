@@ -7,11 +7,15 @@ This program requires the following Python modules to work:
 
 # Configuration
 
-Edit conf.py.example and rename it to conf.py.
+Edit 'bitcoim.conf.example' and rename it to '/etc/bitcoim/bitcoim.conf'.
 
-In the 'component' section, set up the credentials that should be used
-to connect as a component to the Jabber server.
+In the [XMPP] section, set up the credentials that should be used to connect
+as a component to the Jabber server.
 
-The 'db' section is used to set up the file name of the SQLite
-database that the program stores its persistent data in (registrations,
-bitcoin addresses, users' balances, etc.).
+The [database] section is used to set up the file name of the SQLite database
+that the program stores its persistent data in (registrations, bitcoin
+addresses, users' balances, etc.). The user running the program must have
+write access to whatever file name you write in there.
+
+The [bitcoin] section is used for connecting to the bitcoin client (bitcoind
+or bitcoin -server).

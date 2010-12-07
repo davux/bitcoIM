@@ -5,14 +5,10 @@
 import sys
 from bitcoim.db import SQL, Database
 from bitcoin.controller import Controller
-from conf import bitcoin as bitcoinConf, db
+from ConfigParser import NoSectionError, NoOptionError
+from conf import Config
 from logging import error
 
-try:
-    from conf import component as info
-except ImportError:
-    error("Error: Please create a file named 'conf.py' (e.g. rename and edit conf.py.example).\n")
-    sys.exit(1)
 try:
     from xmpp import client, protocol
 except ImportError:
@@ -22,16 +18,49 @@ from bitcoim.component import Component
 
 reload(sys)
 sys.setdefaultencoding('utf8')
-SQL(url=db['file'])
-database = Database(db['file'])
-database.upgrade(1)
+
+config = Config()
+
 try:
-    Controller(bitcoinConf['user'], bitcoinConf['password']).getinfo()
+    dbfile = config.get('database', 'file')
+except NoSectionError:
+    error("No [database] section found")
+    sys.exit(1)
+except NoOptionError:
+    error("No 'file' option found in section [database]")
+    sys.exit(1)
+SQL(url=dbfile)
+database = Database(dbfile)
+database.upgrade(1)
+
+try:
+    bitcoinUser = config.get('bitcoin', 'user')
+    bitcoinPass = config.get('bitcoin', 'password')
+except NoSectionError:
+    error("No [bitcoin] section found")
+    sys.exit(1)
+except NoOptionError:
+    error("No user and/or password in section [bitcoin]")
+    sys.exit(1)
+
+try:
+    Controller(bitcoinUser, bitcoinPass).getinfo()
 except IOError:
     error("Communication error with bitcoin client")
     sys.exit(1)
 try:
-    bitcoIM = Component(info['jid'], info['password'], info['server'], info['port'])
+    componentJid = config.get('XMPP', 'jid')
+    componentPass = config.get('XMPP', 'password')
+    componentServer = config.get('XMPP', 'server')
+    componentPort = config.get('XMPP', 'port', 5269)
+except NoSectionError:
+    error("No [XMPP] section found")
+    sys.exit(1)
+except NoOptionError:
+    error("No connection information found in [XMPP] section")
+    sys.exit(1)
+try:
+    bitcoIM = Component(componentJid, componentPass,componentServer, componentPort)
 except Exception, message:
     error("Error while connecting to server: %s" % (message))
     sys.exit(1)
