@@ -60,7 +60,7 @@ try:
     componentJid = config.get('XMPP', 'jid')
     componentPass = config.get('XMPP', 'password')
     componentServer = config.get('XMPP', 'server')
-    componentPort = config.get('XMPP', 'port', 5269)
+    componentPort = config.get('XMPP', 'port')
 except NoSectionError:
     critical("No [XMPP] section found in configuration")
     sys.exit(1)
