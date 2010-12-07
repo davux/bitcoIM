@@ -5,9 +5,11 @@
 import sys
 from bitcoim.db import SQL, Database
 from bitcoin.controller import Controller
-from ConfigParser import NoSectionError, NoOptionError
-from conf import Config
+from ConfigParser import NoSectionError, NoOptionError, SafeConfigParser
 from logging import basicConfig, critical, DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+config = SafeConfigParser()
+config.read('/etc/bitcoim/bitcoim.conf')
 
 try:
     from xmpp import client, protocol
@@ -18,8 +20,6 @@ from bitcoim.component import Component
 
 reload(sys)
 sys.setdefaultencoding('utf8')
-
-config = Config()
 
 loglevels = {'debug': DEBUG, 'info': INFO, 'warning': WARNING, \
              'error': ERROR, 'critical': CRITICAL}
