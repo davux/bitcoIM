@@ -8,7 +8,8 @@ config = SafeConfigParser()
 config.read('/etc/bitcoim/bitcoim.conf')
 
 # Logging
-from logging import basicConfig, critical, DEBUG, INFO, WARNING, ERROR, CRITICAL
+from logging import basicConfig, critical, debug, info, \
+                    DEBUG, INFO, WARNING, ERROR, CRITICAL
 loglevels = {'debug': DEBUG, 'info': INFO, 'warning': WARNING, \
              'error': ERROR, 'critical': CRITICAL}
 try:
@@ -41,6 +42,7 @@ except NoSectionError:
 except NoOptionError:
     critical("No 'file' option found in section [database] of the configuration")
     sys.exit(1)
+debug("Opening database")
 SQL(url=dbfile)
 database = Database(dbfile)
 database.upgrade(1)
@@ -56,6 +58,7 @@ except NoOptionError:
     critical("No user and/or password in section [bitcoin] of the configuration")
     sys.exit(1)
 from bitcoin.controller import Controller
+info("Connecting to bitcoin client")
 try:
     Controller(bitcoinUser, bitcoinPass).getinfo()
 except IOError:
@@ -75,6 +78,7 @@ except NoSectionError:
 except NoOptionError:
     critical("No connection information found in [XMPP] section of the configuration")
     sys.exit(1)
+info("Connecting to XMPP server")
 try:
     bitcoIM = Component(componentJid, componentPass, componentServer,
                         componentPort, xmppdebug)
@@ -83,7 +87,9 @@ except Exception, message:
     sys.exit(1)
 
 # Start the component
+info("Starting to listen to incoming XMPP communication")
 try:
     bitcoIM.loop(10)
 except KeyboardInterrupt:
+    debug("Keyboard interruption. Exiting...")
     bitcoIM.sayGoodbye()
