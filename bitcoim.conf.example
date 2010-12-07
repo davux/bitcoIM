@@ -12,3 +12,6 @@ user = rpc-user
 password = rpc-password
 host = localhost
 port = 8332 # This is the default port
+
+[main program]
+loglevel = error # possible values: debug, info, warning, error, critical

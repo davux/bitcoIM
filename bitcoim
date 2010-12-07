@@ -7,7 +7,7 @@ from bitcoim.db import SQL, Database
 from bitcoin.controller import Controller
 from ConfigParser import NoSectionError, NoOptionError
 from conf import Config
-from logging import error
+from logging import basicConfig, error, DEBUG, INFO, WARNING, ERROR, CRITICAL
 
 try:
     from xmpp import client, protocol
@@ -20,6 +20,14 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 config = Config()
+
+loglevels = {'debug': DEBUG, 'info': INFO, 'warning': WARNING, \
+             'error': ERROR, 'critical': CRITICAL}
+try:
+    loglevel = loglevels[config.get('main program', 'loglevel', 'info')]
+except IndexError:
+    loglevel = INFO
+basicConfig(level=loglevel)
 
 try:
     dbfile = config.get('database', 'file')

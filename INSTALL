@@ -19,3 +19,18 @@ write access to whatever file name you write in there.
 
 The [bitcoin] section is used for connecting to the bitcoin client (bitcoind
 or bitcoin -server).
+
+The [main program] section handles the behaviour of the program itself.
+Currently, it supports only one option: loglevel. Set it to any of these values:
+ - 'debug': prints all sorts of debugging information about what is going on.
+ - 'info': prints possibly interesting information for a system/service
+           administration purposes.
+ - 'warning': when something abnormal but not grave is happening. Generally,
+              the program is able to deal with the situation, but the fact
+              that it happened might hide something.
+ - 'error': something is going wrong. You probably want to know about it.
+ - 'critical': the program can't continue its execution. By the time you get
+               to read the message, it's probably already stopped.
+
+Any message less important than the value you set won't be printed.
+If you don't set a loglevel, or if you set it wrong, 'info' is assumed.
