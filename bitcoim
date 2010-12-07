@@ -24,8 +24,8 @@ config = Config()
 loglevels = {'debug': DEBUG, 'info': INFO, 'warning': WARNING, \
              'error': ERROR, 'critical': CRITICAL}
 try:
-    loglevel = loglevels[config.get('main program', 'loglevel', 'info')]
-except IndexError:
+    loglevel = loglevels[config.get('main program', 'loglevel')]
+except (IndexError, NoSectionError, NoOptionError):
     loglevel = INFO
 basicConfig(level=loglevel)
 
