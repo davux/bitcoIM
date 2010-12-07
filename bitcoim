@@ -2,25 +2,13 @@
 # -*- coding: utf-8 -*-
 # vi: sts=4 et sw=4
 
-import sys
-from bitcoim.db import SQL, Database
-from bitcoin.controller import Controller
+# Configuration handling
 from ConfigParser import NoSectionError, NoOptionError, SafeConfigParser
-from logging import basicConfig, critical, DEBUG, INFO, WARNING, ERROR, CRITICAL
-
 config = SafeConfigParser()
 config.read('/etc/bitcoim/bitcoim.conf')
 
-try:
-    from xmpp import client, protocol
-except ImportError:
-    critical("Error: this program needs the Python XMPP library.")
-    sys.exit(1)
-from bitcoim.component import Component
-
-reload(sys)
-sys.setdefaultencoding('utf8')
-
+# Logging
+from logging import basicConfig, critical, DEBUG, INFO, WARNING, ERROR, CRITICAL
 loglevels = {'debug': DEBUG, 'info': INFO, 'warning': WARNING, \
              'error': ERROR, 'critical': CRITICAL}
 try:
@@ -29,6 +17,18 @@ except (IndexError, NoSectionError, NoOptionError):
     loglevel = INFO
 basicConfig(level=loglevel)
 
+# Set up XMPP
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
+try:
+    from xmpp import client, protocol
+except ImportError:
+    critical("Error: this program needs the Python XMPP library.")
+    sys.exit(1)
+
+# Set up the database
+from bitcoim.db import SQL, Database
 try:
     dbfile = config.get('database', 'file')
 except NoSectionError:
@@ -41,6 +41,7 @@ SQL(url=dbfile)
 database = Database(dbfile)
 database.upgrade(1)
 
+# Start connection to the Bitcoin controller
 try:
     bitcoinUser = config.get('bitcoin', 'user')
     bitcoinPass = config.get('bitcoin', 'password')
@@ -50,12 +51,15 @@ except NoSectionError:
 except NoOptionError:
     critical("No user and/or password in section [bitcoin] of the configuration")
     sys.exit(1)
-
+from bitcoin.controller import Controller
 try:
     Controller(bitcoinUser, bitcoinPass).getinfo()
 except IOError:
     critical("Communication error with bitcoin client")
     sys.exit(1)
+
+# Start connection to the XMPP server
+from bitcoim.component import Component
 try:
     componentJid = config.get('XMPP', 'jid')
     componentPass = config.get('XMPP', 'password')
@@ -72,6 +76,8 @@ try:
 except Exception, message:
     critical("Error while connecting to server: %s" % (message))
     sys.exit(1)
+
+# Start the component
 try:
     bitcoIM.loop(10)
 except KeyboardInterrupt:
