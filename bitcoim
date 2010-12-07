@@ -7,12 +7,12 @@ from bitcoim.db import SQL, Database
 from bitcoin.controller import Controller
 from ConfigParser import NoSectionError, NoOptionError
 from conf import Config
-from logging import basicConfig, error, DEBUG, INFO, WARNING, ERROR, CRITICAL
+from logging import basicConfig, critical, DEBUG, INFO, WARNING, ERROR, CRITICAL
 
 try:
     from xmpp import client, protocol
 except ImportError:
-    error("Error: this program needs the Python XMPP library.")
+    critical("Error: this program needs the Python XMPP library.")
     sys.exit(1)
 from bitcoim.component import Component
 
@@ -32,10 +32,10 @@ basicConfig(level=loglevel)
 try:
     dbfile = config.get('database', 'file')
 except NoSectionError:
-    error("No [database] section found")
+    critical("No [database] section found in configuration")
     sys.exit(1)
 except NoOptionError:
-    error("No 'file' option found in section [database]")
+    critical("No 'file' option found in section [database] of the configuration")
     sys.exit(1)
 SQL(url=dbfile)
 database = Database(dbfile)
@@ -45,16 +45,16 @@ try:
     bitcoinUser = config.get('bitcoin', 'user')
     bitcoinPass = config.get('bitcoin', 'password')
 except NoSectionError:
-    error("No [bitcoin] section found")
+    critical("No [bitcoin] section found in configuration")
     sys.exit(1)
 except NoOptionError:
-    error("No user and/or password in section [bitcoin]")
+    critical("No user and/or password in section [bitcoin] of the configuration")
     sys.exit(1)
 
 try:
     Controller(bitcoinUser, bitcoinPass).getinfo()
 except IOError:
-    error("Communication error with bitcoin client")
+    critical("Communication error with bitcoin client")
     sys.exit(1)
 try:
     componentJid = config.get('XMPP', 'jid')
@@ -62,15 +62,15 @@ try:
     componentServer = config.get('XMPP', 'server')
     componentPort = config.get('XMPP', 'port', 5269)
 except NoSectionError:
-    error("No [XMPP] section found")
+    critical("No [XMPP] section found in configuration")
     sys.exit(1)
 except NoOptionError:
-    error("No connection information found in [XMPP] section")
+    critical("No connection information found in [XMPP] section of the configuration")
     sys.exit(1)
 try:
     bitcoIM = Component(componentJid, componentPass,componentServer, componentPort)
 except Exception, message:
-    error("Error while connecting to server: %s" % (message))
+    critical("Error while connecting to server: %s" % (message))
     sys.exit(1)
 try:
     bitcoIM.loop(10)
