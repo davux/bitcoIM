@@ -4,6 +4,10 @@ This program requires the following Python modules to work:
   - xmpppy: http://xmpppy.sourceforge.net/
   - bitcoin: http://gitorious.org/python-bitcoin/
 
+It also needs access to a running instance of the bitcoin software
+(version 0.3.17 or later), in server mode (bitcoind or bitcoin -server).
+The bitcoin software must run on localhost.
+
 
 # Configuration
 
