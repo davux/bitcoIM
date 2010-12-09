@@ -10,8 +10,9 @@ file = /var/lib/bitcoim/database.db
 [bitcoin]
 user = rpc-user
 password = rpc-password
-host = localhost
-port = 8332 # This is the default port
+# host = localhost # Defaults to localhost
+# port = 8332 # Defaults to 8332
+# protocol = http # Defaults to http
 
 [main program]
 loglevel = error # possible values: debug, info, warning, error, critical

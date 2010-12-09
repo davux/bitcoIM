@@ -57,10 +57,23 @@ except NoSectionError:
 except NoOptionError:
     critical("No user and/or password in section [bitcoin] of the configuration")
     sys.exit(1)
+try:
+    bitcoinHost = config.get('bitcoin', 'host')
+except NoOptionError:
+    bitcoinHost = 'localhost'
+try:
+    bitcoinPort = config.get('bitcoin', 'port')
+except NoOptionError:
+    bitcoinPort = 8332
+try:
+    bitcoinProtocol = config.get('bitcoin', 'protocol')
+except NoOptionError:
+    bitcoinProtocol = 'http'
 from bitcoin.controller import Controller
 info("Connecting to bitcoin client")
 try:
-    version = Controller(bitcoinUser, bitcoinPass).getinfo()['version']
+    version = Controller(bitcoinUser, bitcoinPass, bitcoinHost, bitcoinPort, \
+                         bitcoinProtocol).getinfo()['version']
 except IOError:
     critical("Communication error with bitcoin client")
     sys.exit(1)

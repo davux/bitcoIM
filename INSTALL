@@ -6,7 +6,8 @@ This program requires the following Python modules to work:
 
 It also needs access to a running instance of the bitcoin software
 (version 0.3.17 or later), in server mode (bitcoind or bitcoin -server).
-The bitcoin software must run on localhost.
+The bitcoin software may run on the same host or on a different one
+(see "Configuration" for more details).
 
 
 # Configuration
@@ -22,7 +23,9 @@ addresses, users' balances, etc.). The user running the program must have
 write access to whatever file name you write in there.
 
 The [bitcoin] section is used for connecting to the bitcoin client (bitcoind
-or bitcoin -server).
+or bitcoin -server). You must at least specify a user and a password.
+Optional parameters are 'host' (defaults to localhost), 'port' (defaults
+to 8332) and 'protocol' (http or https, defaults to http).
 
 The [main program] section handles the behaviour of the program itself.
 Currently, it supports only one option: loglevel. Set it to any of these values:
