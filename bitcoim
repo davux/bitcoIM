@@ -60,10 +60,14 @@ except NoOptionError:
 from bitcoin.controller import Controller
 info("Connecting to bitcoin client")
 try:
-    Controller(bitcoinUser, bitcoinPass).getinfo()
+    version = Controller(bitcoinUser, bitcoinPass).getinfo()['version']
 except IOError:
     critical("Communication error with bitcoin client")
     sys.exit(1)
+if version < 31700:
+    critical("This program requires bitcoin v.0.3.17 or higher")
+    sys.exit(1)
+
 
 # Start connection to the XMPP server
 from bitcoim.component import Component
