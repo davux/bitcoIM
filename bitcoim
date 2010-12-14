@@ -85,6 +85,11 @@ if version < 31700:
 # Start connection to the XMPP server
 from bitcoim.component import Component
 try:
+    admins = set(config.get('main program', 'admins').split())
+except (NoSectionError, NoOptionError):
+    warning("You didn't declare any administrators.")
+    admins = set()
+try:
     componentJid = config.get('XMPP', 'jid')
     componentPass = config.get('XMPP', 'password')
     componentServer = config.get('XMPP', 'server')
@@ -99,6 +104,7 @@ info("Connecting to XMPP server")
 try:
     bitcoIM = Component(componentJid, componentPass, componentServer,
                         componentPort, xmppdebug)
+    bitcoIM.admins = admins
 except Exception, message:
     critical("Error while connecting to server: %s" % (message))
     sys.exit(1)

@@ -16,3 +16,4 @@ password = rpc-password
 
 [main program]
 loglevel = error # possible values: debug, info, warning, error, critical
+# admins = foo@bar.tld # space-separated list of admin JIDs
