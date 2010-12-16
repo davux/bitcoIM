@@ -78,7 +78,7 @@ except IOError:
     critical("Communication error with bitcoin client")
     sys.exit(1)
 if version < 31700:
-    critical("This program requires bitcoin v.0.3.17 or higher")
+    critical("This program requires bitcoin v.0.3.18 or higher")
     sys.exit(1)
 
 
