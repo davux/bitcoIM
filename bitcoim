@@ -105,6 +105,7 @@ try:
     bitcoIM = Component(componentJid, componentPass, componentServer,
                         componentPort, xmppdebug)
     bitcoIM.admins = admins
+    bitcoIM.start()
 except Exception, message:
     critical("Error while connecting to server: %s" % (message))
     sys.exit(1)
@@ -112,7 +113,8 @@ except Exception, message:
 # Start the component
 info("Starting to listen to incoming XMPP communication")
 try:
-    bitcoIM.loop(10)
+    while bitcoIM.Process(10):
+        pass
 except KeyboardInterrupt:
     debug("Keyboard interruption. Exiting...")
     bitcoIM.sayGoodbye()
