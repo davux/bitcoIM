@@ -8,7 +8,7 @@ config = SafeConfigParser()
 config.read('/etc/bitcoim/bitcoim.conf')
 
 # Logging
-from logging import basicConfig, critical, debug, info, \
+from logging import basicConfig, critical, debug, info, warning, \
                     DEBUG, INFO, WARNING, ERROR, CRITICAL
 loglevels = {'debug': DEBUG, 'info': INFO, 'warning': WARNING, \
              'error': ERROR, 'critical': CRITICAL}
@@ -84,11 +84,14 @@ if version < 31700:
 
 # Start connection to the XMPP server
 from bitcoim.component import Component
+from bitcoim.jid import JID
+from bitcoim.useraccount import UserAccount
 try:
-    admins = set(config.get('main program', 'admins').split())
+    for jid in config.get('main program', 'admins').split():
+        debug("Adding %s as admin" % jid)
+        UserAccount(JID(jid)).isAdmin(True)
 except (NoSectionError, NoOptionError):
     warning("You didn't declare any administrators.")
-    admins = set()
 try:
     componentJid = config.get('XMPP', 'jid')
     componentPass = config.get('XMPP', 'password')
@@ -104,7 +107,6 @@ info("Connecting to XMPP server")
 try:
     bitcoIM = Component(componentJid, componentPass, componentServer,
                         componentPort, xmppdebug)
-    bitcoIM.admins = admins
     bitcoIM.start()
 except Exception, message:
     critical("Error while connecting to server: %s" % (message))
