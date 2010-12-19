@@ -3,11 +3,13 @@
 This program requires the following Python modules to work:
   - xmpppy: http://xmpppy.sourceforge.net/
   - bitcoin: http://gitorious.org/python-bitcoin/
+  - python-bitcoim: http://gitorious.org/bitcoim/python-bitcoim/
+                    (version 0.1.0 or later)
 
 It also needs access to a running instance of the bitcoin software
-(version 0.3.17 or later), in server mode (bitcoind or bitcoin -server).
-The bitcoin software may run on the same host or on a different one
-(see "Configuration" for more details).
+(minimum version determined by python-bitcoim), in server mode
+(bitcoind or bitcoin -server). The bitcoin software may run on the same host
+or on a different one (see "Configuration" for more details).
 
 
 # Configuration
