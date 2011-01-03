@@ -104,6 +104,11 @@ except NoOptionError:
     critical("No connection information found in [XMPP] section of the configuration")
     sys.exit(1)
 info("Connecting to XMPP server")
+from bitcoim import i18n
+try:
+    i18n.fallbackLangs = config.get('main program', 'languages').split() + i18n.fallbackLangs
+except (NoSectionError, NoOptionError):
+    pass # leave module's default value
 try:
     bitcoIM = Component(componentJid, componentPass, componentServer,
                         componentPort, xmppdebug)

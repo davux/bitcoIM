@@ -46,3 +46,11 @@ of these values:
 
 Any message less important than the value you set won't be printed.
 If you don't set a loglevel, or if you set it wrong, 'info' is assumed.
+
+You can also configure the preferred languages of the application, for example
+'fr en' (without quotes). This is an ordered, space-separated list of the
+languages that should be tried when resolving a translatable string. Since the
+English language file is guaranteed to be complete, and it is the reference for
+translation, the default value is 'en'. For the same reason, even though you
+don't include 'en' in the list, it will always be added at the end, so that a
+translation can never fail.

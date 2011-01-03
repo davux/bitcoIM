@@ -16,4 +16,6 @@ password = rpc-password
 
 [main program]
 loglevel = error # possible values: debug, info, warning, error, critical
+# languages = fr # space-separated list of preferred languages by default
+                 # 'en' is automatically appended, so no need to add it.
 # admins = foo@bar.tld # space-separated list of admin JIDs
